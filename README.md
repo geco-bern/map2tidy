@@ -19,10 +19,7 @@ df <- map2tidy(
   nclist = list.files(paste0(here::here(), "/data-raw/"), 
                       pattern = "demo_data_2017_month",
                       full.names = TRUE), 
-  outdir = NA, 
-  fileprefix = "demo_data_2017", 
   varnam = "et",
-  ilon = NA,
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
@@ -41,20 +38,19 @@ df$data[[1]] |>
 
 ### Large files
 
-When handling large files, having the complete data frame returned should be avoided to avoid memory overload. Write chunks of the data to separate files, placed in a directory as specified by the argument `outdir = NA`. The chunks will be along longitudinal bands (single index in longitude, all indices in latitude).
+When handling large files, having the complete data frame returned should be avoided to avoid memory overload. Write chunks of the data to separate files, placed in a directory as specified by the argument `outdir` with file names specified by argument `fileprefix`. The chunks will be along longitudinal bands (single index in longitude, all indices in latitude).
 ```r
 map2tidy(
   nclist = list.files(paste0(here::here(), "/data-raw/"), 
                       pattern = "demo_data_2017_month",
                       full.names = TRUE), 
-  outdir = paste0(here::here(), "/data/"), 
-  fileprefix = "demo_data_2017", 
   varnam = "et",
-  ilon = NA,
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
   timedimnam = "time",
+  outdir = paste0(here::here(), "/data/"), 
+  fileprefix = "demo_data_2017", 
   overwrite = TRUE
   )
 ```
@@ -67,14 +63,13 @@ map2tidy(
   nclist = list.files(paste0(here::here(), "/data-raw/"), 
                       pattern = "demo_data_2017_month",
                       full.names = TRUE), 
-  outdir = paste0(here::here(), "/data/"), 
-  fileprefix = "demo_data_2017", 
   varnam = "et",
-  ilon = NA,
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
   timedimnam = "time",
+  outdir = paste0(here::here(), "/data/"), 
+  fileprefix = "demo_data_2017", 
   ncores = 3,
   overwrite = TRUE
   )

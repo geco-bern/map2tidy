@@ -7,23 +7,23 @@
 #'
 #' @param nclist A vector of character strings specifying the complete paths to
 #' files.
-#' @param outdir A character string specifying output directory where data
-#' frames are written using the \code{save} statement. If omitted (defaults to
-#' \code{NA}), a tidy data frame containing all data is returned.
-#' @param fileprefix A character string specifying the file name prefix.
 #' @param varnam The variable name(s) for which data is to be read from NetCDF
 #' files.
-#' @param ilon An integer specifying an individual longitude index for chunking
-#' all processing and writing chunks to separate output files. If provided,
-#' it overrides that the function extracts data for all longitude indices. If
-#' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
-#' indexes.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #' @param latnam The dimension name of latitude in the NetCDF files.
 #' @param timenam The name of dimension variable used for timein the NetCDF
 #' files. Defaults to \code{"time"}.
 #' @param timedimnam The name of the dimension (axis) used for time.
 #' Defaults to \code{"time"}.
+#' @param outdir A character string specifying output directory where data
+#' frames are written using the \code{save} statement. If omitted (defaults to
+#' \code{NA}), a tidy data frame containing all data is returned.
+#' @param fileprefix A character string specifying the file name prefix.
+#' @param ilon An integer specifying an individual longitude index for chunking
+#' all processing and writing chunks to separate output files. If provided,
+#' it overrides that the function extracts data for all longitude indices. If
+#' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
+#' indexes.
 #' @param ncores Number of cores for parallel execution (distributing
 #' extraction of longitude slices). When set to \code{"all"}, the number of
 #' cores for parallelisation is determined by \code{parallel::detectCores()}.
@@ -41,14 +41,14 @@
 #'
 map2tidy <- function(
   nclist,
-  outdir = NA,
-  fileprefix,
   varnam,
-  ilon = NA,
   lonnam = "lon",
   latnam = "lat",
   timenam = "time",
   timedimnam = "time",
+  outdir = NA,
+  fileprefix = NA,
+  ilon = NA,
   ncores = 1,
   single_basedate = FALSE,
   fgetdate = NA,
