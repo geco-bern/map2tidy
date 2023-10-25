@@ -1,4 +1,13 @@
-# map2tidy: Make geospatial data with a time dimension into a tidy format
+---
+title: "Example"
+author: "Beni Stocker"
+date: "2023-10-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 ## The problem
 
@@ -14,7 +23,7 @@ The function `map2tidy` takes a vector of file names (full paths) of NetCDF file
 
 (Internal note: This builds on the function `nclist_to_df` of package {rbeni}.)
 
-```r
+```{r}
 df <- map2tidy(
   nclist = list.files(paste0(here::here(), "/data-raw/"), 
                       pattern = "demo_data_2017_month",
@@ -33,7 +42,7 @@ df
 ```
 
 The complete time series are now nested data frames in column `data`. We can plot them.
-```r
+```{r}
 df$data[[1]] |> 
   ggplot(aes(time, et)) +
   geom_line()
@@ -42,7 +51,7 @@ df$data[[1]] |>
 ### Large files
 
 When handling large files, having the complete data frame returned should be avoided to avoid memory overload. Write chunks of the data to separate files, placed in a directory as specified by the argument `outdir = NA`. The chunks will be along longitudinal bands (single index in longitude, all indices in latitude).
-```r
+```{r}
 map2tidy(
   nclist = list.files(paste0(here::here(), "/data-raw/"), 
                       pattern = "demo_data_2017_month",
@@ -62,7 +71,7 @@ map2tidy(
 ### Parallelisation
 
 This process can be parallelised by setting the argument `ncores = 3` (or to another suitable number of cores).
-```r
+```{r}
 map2tidy(
   nclist = list.files(paste0(here::here(), "/data-raw/"), 
                       pattern = "demo_data_2017_month",
@@ -79,3 +88,4 @@ map2tidy(
   overwrite = TRUE
   )
 ```
+
