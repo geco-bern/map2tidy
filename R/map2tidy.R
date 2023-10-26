@@ -36,6 +36,10 @@
 #' @param overwrite A logical indicating whether time series files are to be
 #' overwritten.
 #'
+#' @importFrom utils data
+#' @importFrom stats time
+#' @importFrom magrittr %>%
+#'
 #' @return Nothing. Writes data to .rds files for each longitude index.
 #' @export
 #'
@@ -67,9 +71,9 @@ map2tidy <- function(
   if (single_basedate && is.na(fgetdate)){
     # get base date (to interpret time units in 'days since X')
     basedate <- ncmeta::nc_atts(nclist[1], timenam) %>%
-      tidyr::unnest(cols = c(value)) %>%
-      dplyr::filter(name == "units") %>%
-      dplyr::pull(value) %>%
+      tidyr::unnest(cols = c("value")) %>%
+      dplyr::filter("name" == "units") %>%
+      dplyr::pull("value") %>%
       stringr::str_remove("days since ") %>%
       stringr::str_remove(" 00:00:00") %>%
       stringr::str_remove(" 0:0:0") %>%
@@ -102,39 +106,47 @@ map2tidy <- function(
       multidplyr::cluster_assign(nclist_to_df_byilon = map2tidy::nclist_to_df_byilon)
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
-    out <- tibble(ilon = ilon) %>%
+    out <- dplyr::tibble(ilon = ilon) %>%
       multidplyr::partition(cl) %>%
-      dplyr::mutate(out = purrr::map_int( ilon,
-                                          ~map2tidy::nclist_to_df_byilon(nclist,
-                                                               .,
-                                                               outdir,
-                                                               fileprefix,
-                                                               varnam,
-                                                               lonnam,
-                                                               latnam,
-                                                               basedate,
-                                                               timenam,
-                                                               timedimnam,
-                                                               fgetdate,
-                                                               overwrite)))
-
+      dplyr::mutate(
+        out = purrr::map_int(
+          ilon,
+          ~map2tidy::nclist_to_df_byilon(
+            nclist,
+            .,
+            outdir,
+            fileprefix,
+            varnam,
+            lonnam,
+            latnam,
+            basedate,
+            timenam,
+            timedimnam,
+            fgetdate,
+            overwrite
+            )
+          )
+        )
   } else {
-    out <- purrr::map(as.list(ilon), ~map2tidy::nclist_to_df_byilon(nclist,
-                                                   .,
-                                                   outdir,
-                                                   fileprefix,
-                                                   varnam,
-                                                   lonnam,
-                                                   latnam,
-                                                   basedate,
-                                                   timenam,
-                                                   timedimnam,
-                                                   fgetdate,
-                                                   overwrite))
+    out <- purrr::map(
+      as.list(ilon),
+      ~map2tidy::nclist_to_df_byilon(
+        nclist,
+        .,
+        outdir,
+        fileprefix,
+        varnam,
+        lonnam,
+        latnam,
+        basedate,
+        timenam,
+        timedimnam,
+        fgetdate,
+        overwrite))
   }
 
   if (is.na(outdir)){
-    return(bind_rows(out))
+    return(dplyr::bind_rows(out))
   } else {
     return(NULL)
   }

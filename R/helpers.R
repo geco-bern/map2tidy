@@ -43,6 +43,9 @@ nclist_to_df_byilon <- function(
     overwrite
 ){
 
+  # CRAN HACK, use .data$ syntax for correct fix
+  lat <- lon <- value <- NULL
+
   if (!is.na(outdir)){
     # check whether output has been created already (otherwise do nothing)
     if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
@@ -102,6 +105,7 @@ nclist_to_df_byilon <- function(
 
 #' To back fill
 #'
+#' @param filnam file name
 #' @param varnam The variable name(s) for which data is to be read from NetCDF
 #' files.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
@@ -133,6 +137,9 @@ nclist_to_df_byfil <- function(
     timedimnam,
     fgetdate
 ){
+
+  # CRAN HACK, use .data$ syntax for correct fix
+  index <- lat <- lon <- name <- near <- value <- NULL
 
   if (is.na(basedate) && is.na(fgetdate)){
     # get base date (to interpret time units in 'days since X')
