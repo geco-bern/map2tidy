@@ -1,5 +1,5 @@
 Package: map2tidy
-Title: Make geospatial data with a time dimension into a tidy format
+Title: Map Spatio-temporal NetCDF Stacks Along Time
 Version: 1.0
 Authors@R: 
     person(
@@ -9,9 +9,9 @@ Authors@R:
       role = c("aut", "cre"),
       comment = c(ORCID = "0000-0003-2697-9096")
     )
-Description: What the package does (one paragraph).
+Description: Make geospatial data with a time dimension into a tidy format. Facilitates temporal analysis on a location basis.
 Depends:
-    R (>= 4.1.0)
+    R (>= 4.2)
 Imports:
     dplyr,
     purrr,
@@ -20,14 +20,22 @@ Imports:
     magrittr,
     ncmeta,
     tidync,
-    tidyr,
     readr,
     stringr,
     lubridate,
     parallel,
     multidplyr,
-    here
+    utils,
+    stats
+Suggests:
+    rmarkdown,
+    covr,
+    testthat,
+    knitr,
+    ggplot2
 License: AGPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+VignetteBuilder: knitr
+ByteCompile: true

@@ -3,11 +3,12 @@
 ^_pkgdown\.yml$
 ^pkgdown$
 ^docs$
+^analysis$
 ^data-raw$
-^vignettes_add$
+^manuscript$
 
 # R-markdown files in the root folder.
-^LICENSE.*$
+^LICENSE$
 ^CONDUCT\.md$
 ^NEWS\.md$
 ^README\.md$
@@ -15,10 +16,12 @@
 ^cran-comments\.md$
 ^review-notes\.md$
 
-# R Stuff
+# Stuff
 ^.*\.Rproj$
 ^.*\.Renviron$
 ^\.Rproj\.user$
 ^\.httr-oauth$
 ^.*-logo\..*$
+^logo.png$
 ^codemeta\.json$
+^CRAN-SUBMISSION$
