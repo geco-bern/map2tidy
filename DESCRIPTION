@@ -20,7 +20,6 @@ Imports:
     magrittr,
     ncmeta,
     tidync,
-    tidyr,
     readr,
     stringr,
     lubridate,
