@@ -24,6 +24,9 @@ The function `map2tidy` takes a vector of file names (full paths) of NetCDF file
 (Internal note: This builds on the function `nclist_to_df` of package {rbeni}.)
 
 ```{r}
+library(map2tidy)
+library(tidyverse)
+
 df <- map2tidy(
   nclist = list.files(paste0(here::here(), "/data-raw/"), 
                       pattern = "demo_data_2017_month",

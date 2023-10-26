@@ -6,14 +6,14 @@
 \usage{
 map2tidy(
   nclist,
-  outdir,
-  fileprefix,
   varnam,
-  ilon = NA,
   lonnam = "lon",
   latnam = "lat",
   timenam = "time",
   timedimnam = "time",
+  outdir = NA,
+  fileprefix = NA,
+  ilon = NA,
   ncores = 1,
   single_basedate = FALSE,
   fgetdate = NA,
@@ -24,19 +24,8 @@ map2tidy(
 \item{nclist}{A vector of character strings specifying the complete paths to
 files.}
 
-\item{outdir}{A character string specifying output directory where data
-frames are written using the \code{save} statement.}
-
-\item{fileprefix}{A character string specifying the file name prefix.}
-
 \item{varnam}{The variable name(s) for which data is to be read from NetCDF
 files.}
-
-\item{ilon}{An integer specifying an individual longitude index for chunking
-all processing and writing chunks to separate output files. If provided,
-it overrides that the function extracts data for all longitude indices. If
-omitted (\code{ilon = NA}), the function returns tidy data for all longitude
-indexes.}
 
 \item{lonnam}{The dimension name of longitude in the NetCDF files.}
 
@@ -47,6 +36,18 @@ files. Defaults to \code{"time"}.}
 
 \item{timedimnam}{The name of the dimension (axis) used for time.
 Defaults to \code{"time"}.}
+
+\item{outdir}{A character string specifying output directory where data
+frames are written using the \code{save} statement. If omitted (defaults to
+\code{NA}), a tidy data frame containing all data is returned.}
+
+\item{fileprefix}{A character string specifying the file name prefix.}
+
+\item{ilon}{An integer specifying an individual longitude index for chunking
+all processing and writing chunks to separate output files. If provided,
+it overrides that the function extracts data for all longitude indices. If
+omitted (\code{ilon = NA}), the function returns tidy data for all longitude
+indexes.}
 
 \item{ncores}{Number of cores for parallel execution (distributing
 extraction of longitude slices). When set to \code{"all"}, the number of
@@ -64,10 +65,11 @@ based on the file name.}
 overwritten.}
 }
 \value{
-Nothing. Writes data to .RData files for each longitude index.
+Nothing. Writes data to .rds files for each longitude index.
 }
 \description{
 Extracts full time series from a list of NetCDF files, provided for time
-steps (can be one time step or multiple time steps) separately and writes
-.RData files for each longitude index.
+steps (can be one time step or multiple time steps) separately and optionally
+writes.rds files for each longitude index instead of returning the whole
+data.
 }
