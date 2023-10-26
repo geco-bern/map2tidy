@@ -25,7 +25,8 @@ Imports:
     lubridate,
     parallel,
     multidplyr,
-    here
+    utils,
+    stats
 License: AGPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
