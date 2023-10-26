@@ -3,3 +3,6 @@
 export(map2tidy)
 export(nclist_to_df_byfil)
 export(nclist_to_df_byilon)
+importFrom(magrittr,"%>%")
+importFrom(stats,time)
+importFrom(utils,data)
