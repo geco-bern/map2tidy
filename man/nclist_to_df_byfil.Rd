@@ -17,6 +17,8 @@ nclist_to_df_byfil(
 )
 }
 \arguments{
+\item{filnam}{file name}
+
 \item{ilon}{An integer specifying an individual longitude index for chunking
 all processing and writing chunks to separate output files. If provided,
 it overrides that the function extracts data for all longitude indices. If
