@@ -27,6 +27,12 @@ Imports:
     multidplyr,
     utils,
     stats
+Suggests:
+    rmarkdown,
+    covr,
+    testthat,
+    knitr,
+    ggplot2
 License: AGPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
