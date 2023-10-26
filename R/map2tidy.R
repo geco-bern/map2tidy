@@ -227,7 +227,7 @@ nclist_to_df_byilon <- function(
                           )
       )
 
-    # chech if any element has zero rows and drop that element
+    # check if any element has zero rows and drop that element
     drop_zerorows <- function(y) { return(y[!sapply(y,
                           function(x) nrow(x)==0 )]) }
     df <- df %>%
@@ -238,7 +238,7 @@ nclist_to_df_byilon <- function(
         dplyr::bind_rows() %>%
         dplyr::group_by(lon, lat) %>%
         tidyr::nest() %>%
-        dplyr::mutate(data = purrr::map(data, ~arrange(., time)))
+        dplyr::mutate(data = purrr::map(data, ~dplyr::arrange(., time)))
     }
 
     if (!is.na(outdir)){
@@ -248,7 +248,7 @@ nclist_to_df_byilon <- function(
     }
 
   } else {
-    print(paste("File exists already:", outpath))
+    message(paste("File exists already:", outpath))
   }
 
   if (is.na(outdir)){
