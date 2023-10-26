@@ -1,8 +1,12 @@
 ---
-title: "Example"
+title: "map2tidy functionality"
 author: "Beni Stocker"
-date: "2023-10-25"
-output: html_document
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{map2tidy functionality}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -21,16 +25,19 @@ This package solves this problem.
 
 The function `map2tidy` takes a vector of file names (full paths) of NetCDF files containing geospatial data and returns a tidy data frame where each row represents one pixel of the geospatial (raster) data and the complete time series of each pixel is contained as a nested data frame in the column `data`.
 
-(Internal note: This builds on the function `nclist_to_df` of package {rbeni}.)
-
 ```{r}
 library(map2tidy)
 library(tidyverse)
 
+# list demo file path
+path <- file.path(system.file(package = "map2tidy"),"extdata")
+
+# list demo files
+files <- list.files(path, pattern = "demo_data_2017_month", full.names = TRUE)
+
+# load and convert
 df <- map2tidy(
-  nclist = list.files(paste0(here::here(), "/data-raw/"), 
-                      pattern = "demo_data_2017_month",
-                      full.names = TRUE), 
+  nclist = files, 
   varnam = "et",
   lonnam = "lon", 
   latnam = "lat", 
@@ -53,15 +60,13 @@ df$data[[1]] |>
 When handling large files, having the complete data frame returned should be avoided to avoid memory overload. Write chunks of the data to separate files, placed in a directory as specified by the argument `outdir` with file names specified by argument `fileprefix`. The chunks will be along longitudinal bands (single index in longitude, all indices in latitude).
 ```{r}
 map2tidy(
-  nclist = list.files(paste0(here::here(), "/data-raw/"), 
-                      pattern = "demo_data_2017_month",
-                      full.names = TRUE), 
+  nclist = files, 
   varnam = "et",
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
   timedimnam = "time",
-  outdir = paste0(here::here(), "/data/"), 
+  outdir = tempdir(), 
   fileprefix = "demo_data_2017", 
   overwrite = TRUE
   )
@@ -72,9 +77,7 @@ map2tidy(
 This process can be parallelised by setting the argument `ncores = 3` (or to another suitable number of cores).
 ```{r}
 map2tidy(
-  nclist = list.files(paste0(here::here(), "/data-raw/"), 
-                      pattern = "demo_data_2017_month",
-                      full.names = TRUE), 
+  nclist = files, 
   varnam = "et",
   lonnam = "lon", 
   latnam = "lat", 
