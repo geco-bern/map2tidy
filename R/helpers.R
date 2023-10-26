@@ -139,7 +139,7 @@ nclist_to_df_byfil <- function(
 ){
 
   # CRAN HACK, use .data$ syntax for correct fix
-  index <- lat <- lon <- name <- near <- value <- NULL
+  index <- lat <- lon <- name <- value <- NULL
 
   if (is.na(basedate) && is.na(fgetdate)){
     # get base date (to interpret time units in 'days since X')
@@ -154,7 +154,7 @@ nclist_to_df_byfil <- function(
   }
 
   df <- tidync::tidync(filnam) %>%
-    tidync::hyper_filter(lon = near(index, ilon)) %>%
+    tidync::hyper_filter(lon = dplyr::near(index, ilon)) %>%
     tidync::hyper_tibble(tidyselect::vars_pull(varnam))
 
   if (nrow(df)>0){
