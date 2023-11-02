@@ -11,9 +11,9 @@ map2tidy(
   latnam = "lat",
   timenam = "time",
   timedimnam = "time",
+  do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
-  ilon = NA,
   ncores = 1,
   single_basedate = FALSE,
   fgetdate = NA,
@@ -37,17 +37,17 @@ files. Defaults to \code{"time"}.}
 \item{timedimnam}{The name of the dimension (axis) used for time.
 Defaults to \code{"time"}.}
 
+\item{do_chunks}{A logical specifying whether chunks of data should be
+written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
+arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
+longitudinal bands and the number of chunks corresponds to the number length
+of the longitude dimension.}
+
 \item{outdir}{A character string specifying output directory where data
 frames are written using the \code{save} statement. If omitted (defaults to
 \code{NA}), a tidy data frame containing all data is returned.}
 
 \item{fileprefix}{A character string specifying the file name prefix.}
-
-\item{ilon}{An integer specifying an individual longitude index for chunking
-all processing and writing chunks to separate output files. If provided,
-it overrides that the function extracts data for all longitude indices. If
-omitted (\code{ilon = NA}), the function returns tidy data for all longitude
-indexes.}
 
 \item{ncores}{Number of cores for parallel execution (distributing
 extraction of longitude slices). When set to \code{"all"}, the number of

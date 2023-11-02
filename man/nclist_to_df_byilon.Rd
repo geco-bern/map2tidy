@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{nclist_to_df_byilon}
 \alias{nclist_to_df_byilon}
-\title{To back fill}
+\title{Returns a tidy data frame from a NetCDF file for a longitudinal band}
 \usage{
 nclist_to_df_byilon(
   nclist,
@@ -60,5 +60,5 @@ overwritten.}
 not sure
 }
 \description{
-To back fill
+Returns a tidy data frame from a NetCDF file for a longitudinal band
 }

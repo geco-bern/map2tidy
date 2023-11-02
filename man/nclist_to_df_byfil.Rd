@@ -2,11 +2,12 @@
 % Please edit documentation in R/helpers.R
 \name{nclist_to_df_byfil}
 \alias{nclist_to_df_byfil}
-\title{To back fill}
+\title{Returns a tidy data frame from a NetCDF file, optionally for a longitudinal
+band}
 \usage{
 nclist_to_df_byfil(
   filnam,
-  ilon,
+  ilon = NA,
   basedate,
   varnam,
   lonnam,
@@ -25,7 +26,7 @@ it overrides that the function extracts data for all longitude indices. If
 omitted (\code{ilon = NA}), the function returns tidy data for all longitude
 indexes.}
 
-\item{basedate}{not sure}
+\item{basedate}{reference data for NetCDF time dimension}
 
 \item{varnam}{The variable name(s) for which data is to be read from NetCDF
 files.}
@@ -47,5 +48,6 @@ based on the file name.}
 not sure
 }
 \description{
-To back fill
+Returns a tidy data frame from a NetCDF file, optionally for a longitudinal
+band
 }

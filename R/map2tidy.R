@@ -15,15 +15,15 @@
 #' files. Defaults to \code{"time"}.
 #' @param timedimnam The name of the dimension (axis) used for time.
 #' Defaults to \code{"time"}.
+#' @param do_chunks A logical specifying whether chunks of data should be
+#' written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
+#' arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
+#' longitudinal bands and the number of chunks corresponds to the number length
+#' of the longitude dimension.
 #' @param outdir A character string specifying output directory where data
 #' frames are written using the \code{save} statement. If omitted (defaults to
 #' \code{NA}), a tidy data frame containing all data is returned.
 #' @param fileprefix A character string specifying the file name prefix.
-#' @param ilon An integer specifying an individual longitude index for chunking
-#' all processing and writing chunks to separate output files. If provided,
-#' it overrides that the function extracts data for all longitude indices. If
-#' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
-#' indexes.
 #' @param ncores Number of cores for parallel execution (distributing
 #' extraction of longitude slices). When set to \code{"all"}, the number of
 #' cores for parallelisation is determined by \code{parallel::detectCores()}.
@@ -50,17 +50,31 @@ map2tidy <- function(
   latnam = "lat",
   timenam = "time",
   timedimnam = "time",
+  do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
-  ilon = NA,
   ncores = 1,
   single_basedate = FALSE,
   fgetdate = NA,
   overwrite = FALSE
   ){
 
-  # Determine longitude indices
-  if (identical(NA, ilon)){
+  # check plausibility of argument combination
+  if (ncores > 1 && !do_chunks){
+    warning("Warning: using multiple cores (ncores > 1) only takes effect when
+            do_chunks is TRUE.")
+  }
+
+  # Determine longitude indices for chunks
+  if (do_chunks){
+
+    # check if necessary arguments are provided
+    if (identical(NA, outdir) || identical(NA, fileprefix)){
+      warning("Error: arguments outdir and fileprefix must be specified when
+              do_chunks is TRUE.")
+      return()
+    }
+
     # open one file to get longitude information
     nlon <- ncmeta::nc_dim(nclist[1], lonnam) %>%
       dplyr::pull(length)
@@ -90,6 +104,7 @@ map2tidy <- function(
   # This step can be parallelized (dependecies: tidync, dplyr, tidyr, purrr, magrittr)
   if (ncores > 1 && length(ilon) > 1){
 
+    # chunking by longitude and sending to cluster for parallelisation
     cl <- multidplyr::new_cluster(ncores) %>%
       multidplyr::cluster_library(c("dplyr", "purrr", "tidyr", "tidync", "dplyr", "magrittr")) %>%
       multidplyr::cluster_assign(nclist = nclist) %>%
@@ -127,7 +142,10 @@ map2tidy <- function(
             )
           )
         )
-  } else {
+
+  } else if (do_chunks) {
+
+    # chunking by longitude
     out <- purrr::map(
       as.list(ilon),
       ~map2tidy::nclist_to_df_byilon(
@@ -143,6 +161,22 @@ map2tidy <- function(
         timedimnam,
         fgetdate,
         overwrite))
+
+  } else {
+
+    # no chunking. read entire files.
+    out <- purrr::map(
+      as.list(nclist),
+      ~map2tidy::nclist_to_df_byfil(
+        .,
+        ilon = NA,
+        basedate,
+        varnam,
+        lonnam,
+        latnam,
+        timenam,
+        timedimnam,
+        fgetdate))
   }
 
   if (is.na(outdir)){

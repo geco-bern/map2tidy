@@ -1,4 +1,4 @@
-#' To back fill
+#' Returns a tidy data frame from a NetCDF file for a longitudinal band
 #'
 #' @param nclist A vector of character strings specifying the complete paths to
 #' files.
@@ -103,9 +103,16 @@ nclist_to_df_byilon <- function(
 }
 
 
-#' To back fill
+#' Returns a tidy data frame from a NetCDF file, optionally for a longitudinal
+#' band
 #'
 #' @param filnam file name
+#' @param ilon An integer specifying an individual longitude index for chunking
+#' all processing and writing chunks to separate output files. If provided,
+#' it overrides that the function extracts data for all longitude indices. If
+#' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
+#' indexes.
+#' @param basedate reference data for NetCDF time dimension
 #' @param varnam The variable name(s) for which data is to be read from NetCDF
 #' files.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
@@ -114,12 +121,6 @@ nclist_to_df_byilon <- function(
 #' files. Defaults to \code{"time"}.
 #' @param timedimnam The name of the dimension (axis) used for time.
 #' Defaults to \code{"time"}.
-#' @param ilon An integer specifying an individual longitude index for chunking
-#' all processing and writing chunks to separate output files. If provided,
-#' it overrides that the function extracts data for all longitude indices. If
-#' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
-#' indexes.
-#' @param basedate not sure
 #' @param fgetdate A function to derive the date used for the time dimension
 #' based on the file name.
 #'
@@ -128,7 +129,7 @@ nclist_to_df_byilon <- function(
 
 nclist_to_df_byfil <- function(
     filnam,
-    ilon,
+    ilon = NA,
     basedate,
     varnam,
     lonnam,
@@ -153,9 +154,17 @@ nclist_to_df_byfil <- function(
       lubridate::ymd()
   }
 
-  df <- tidync::tidync(filnam) %>%
-    tidync::hyper_filter(lon = dplyr::near(index, ilon)) %>%
-    tidync::hyper_tibble(tidyselect::vars_pull(varnam))
+  if (identical(NA, ilon)){
+    # get all data
+    df <- tidync::tidync(filnam) %>%
+      tidync::hyper_tibble(tidyselect::vars_pull(varnam))
+
+  } else {
+    # subset data to longitudinal band
+    df <- tidync::tidync(filnam) %>%
+      tidync::hyper_filter(lon = dplyr::near(index, ilon)) %>%
+      tidync::hyper_tibble(tidyselect::vars_pull(varnam))
+  }
 
   if (nrow(df)>0){
 
