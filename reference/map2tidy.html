@@ -73,9 +73,9 @@ data.</p>
 <span>  latnam <span class="op">=</span> <span class="st">"lat"</span>,</span>
 <span>  timenam <span class="op">=</span> <span class="st">"time"</span>,</span>
 <span>  timedimnam <span class="op">=</span> <span class="st">"time"</span>,</span>
+<span>  do_chunks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  outdir <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  fileprefix <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  ilon <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  ncores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  single_basedate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  fgetdate <span class="op">=</span> <span class="cn">NA</span>,</span>
@@ -113,6 +113,14 @@ files. Defaults to <code>"time"</code>.</p></dd>
 Defaults to <code>"time"</code>.</p></dd>
 
 
+<dt>do_chunks</dt>
+<dd><p>A logical specifying whether chunks of data should be
+written to files. Defaults to <code>FALSE</code>. If set to <code>TRUE</code>, the
+arguments <code>outdir</code> and <code>fileprefix</code> must be specified. Chunks are
+longitudinal bands and the number of chunks corresponds to the number length
+of the longitude dimension.</p></dd>
+
+
 <dt>outdir</dt>
 <dd><p>A character string specifying output directory where data
 frames are written using the <code>save</code> statement. If omitted (defaults to
@@ -121,14 +129,6 @@ frames are written using the <code>save</code> statement. If omitted (defaults t
 
 <dt>fileprefix</dt>
 <dd><p>A character string specifying the file name prefix.</p></dd>
-
-
-<dt>ilon</dt>
-<dd><p>An integer specifying an individual longitude index for chunking
-all processing and writing chunks to separate output files. If provided,
-it overrides that the function extracts data for all longitude indices. If
-omitted (<code>ilon = NA</code>), the function returns tidy data for all longitude
-indexes.</p></dd>
 
 
 <dt>ncores</dt>
