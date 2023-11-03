@@ -83,7 +83,7 @@ map2tidy(
 
 ### Parallelisation
 
-This process can be parallelised by setting the argument `ncores = 3` (or to another suitable number of cores).
+This process can be parallelised by setting the argument `ncores = 3` (or to another suitable number of cores) and "chunking" the data processing. This writes output to files for each longitudinal band (Note: May implement output writing for each chunk instead in the future).
 ```{r eval = FALSE}
 map2tidy(
   nclist = files, 
@@ -92,6 +92,7 @@ map2tidy(
   latnam = "lat", 
   timenam = "time", 
   timedimnam = "time",
+  do_chunks = TRUE,
   outdir = tempdir(), 
   fileprefix = "demo_data_2017", 
   ncores = 3,

@@ -32,7 +32,8 @@ Suggests:
     covr,
     testthat,
     knitr,
-    ggplot2
+    ggplot2,
+    here
 License: AGPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

@@ -75,7 +75,7 @@ map2tidy <- function(
       return()
     }
 
-    # open one file to get longitude information
+    # open one file to get longitude information: length of longitude dimension
     nlon <- ncmeta::nc_dim(nclist[1], lonnam) %>%
       dplyr::pull(length)
 
@@ -118,7 +118,8 @@ map2tidy <- function(
       multidplyr::cluster_assign(timedimnam = timedimnam) %>%
       multidplyr::cluster_assign(fgetdate = fgetdate) %>%
       multidplyr::cluster_assign(overwrite = overwrite) %>%
-      multidplyr::cluster_assign(nclist_to_df_byilon = map2tidy::nclist_to_df_byilon)
+      multidplyr::cluster_assign(nclist_to_df_byilon = nclist_to_df_byilon) %>%
+      multidplyr::cluster_assign(nclist_to_df_byfil = nclist_to_df_byfil)
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
     out <- dplyr::tibble(ilon = ilon) %>%
@@ -126,7 +127,7 @@ map2tidy <- function(
       dplyr::mutate(
         out = purrr::map_int(
           ilon,
-          ~map2tidy::nclist_to_df_byilon(
+          ~nclist_to_df_byilon(
             nclist,
             .,
             outdir,
@@ -177,6 +178,18 @@ map2tidy <- function(
         timenam,
         timedimnam,
         fgetdate))
+
+    if (!is.na(outdir)){
+      if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
+      outpath <- paste0(outdir, fileprefix, ".rds")
+      if (!file.exists(outpath) || overwrite){
+        message(paste("Writing file", outpath, "..."))
+        readr::write_rds(out, file = outpath)
+        rm("out")
+      } else {
+        message(paste("File exists already:", outpath))
+      }
+    }
   }
 
   if (is.na(outdir)){

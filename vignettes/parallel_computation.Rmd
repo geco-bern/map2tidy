@@ -1,0 +1,152 @@
+---
+title: "Parallel computation on large data"
+author: "Beni Stocker"
+date: "2023-11-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+If an analysis or modelling task relies on having access to complete time series data, the complete sequential data has to be read into memory, but not for all gridcells of geospatial raster data. This lends itself to parallelising the task across gridcells. This not only speeds up the computation but may also avoid critical memory limitation.
+
+The workflow proposed here is the following:
+
+- Convert geospatial raster data into a tidy data frame.
+- Write the analysis or modelling task as a function.
+- Wrap that function for gridcells within a longitudinal band.
+- Write an R script that distributes jobs.
+
+This is demonstrated below.
+
+## Make data tidy
+
+Convert geospatial raster data (e.g., saved as NetCDF, potentially as a list of NetCDF files for multiple time slices) into a tidy data frame. To avoid the memory limitation, we write tidy data into multiple files, separated by longitudinal bands.
+
+This is demonstrated and explained in the vignette *map2tidy functionality*. The demo data are raster files of 30 x 30 in latitude and longitude.
+```{r eval = FALSE}
+map2tidy(
+  nclist = files, 
+  varnam = "et",
+  lonnam = "lon", 
+  latnam = "lat", 
+  timenam = "time", 
+  timedimnam = "time",
+  do_chunks = TRUE,
+  outdir = tempdir(), 
+  fileprefix = "demo_data_2017", 
+  ncores = 3,
+  overwrite = TRUE
+  )
+```
+
+## Define function
+
+Write the analysis or modelling task as a function, `add_loess()` in the exmple below, that runs with the time series data for a single gridcell as a data frame as its first argument and returns a data frame.
+ 
+This can be anything. Here, we perform a LOESS spline on the time series of the column `et` and add its result as a new column to the data frame. The function requires the time series data frame as its input. Write the function into a file `R/add_loess.R`.
+```{r}
+add_loess <- function(df){
+  df <- df |> 
+    dplyr::mutate(year_dec = lubridate::decimal_date(time)) %>%
+    dplyr::mutate(loess = stats::loess( et ~ year_dec,
+                                        data = ., 
+                                        span = 0.05 )$fitted)
+  return(df)
+}
+```
+
+
+## By longitudinal band
+
+Wrap that function into another function `add_loess_byilon()` that takes the longitude index as its first argument and loops over gridcells within that longitudinal band. The data frame `df` is already nested. Write modified data
+for this longitudinal band to file again. Write this function into a file `R/add_loess_byilon.R`
+```{r}
+add_loess_byilon <- function(ilon){
+  
+  source(paste0(here::here(), "/R/add_loess.R"))
+  
+  # read from file that contains tidy data for a single longitudinal band
+  filnam <- list.files(tempdir(), 
+                       pattern = paste0("_", as.character(ilon), ".rds"),
+                       full.names = TRUE)
+  
+  df <- readr::read_rds(filnam)
+  
+  df <- df |> 
+    
+    # Uncomment code below to nest data by gridcell, if not already nested.
+    # # group data by gridcells and wrap time series for each gridcell into a new
+    # # column, by default called 'data'.
+    # dplyr::group_by(lon, lat) |> 
+    # tidyr::nest() |> 
+    
+    # apply the custom function on the time series data frame separately for 
+    # each gridcell.
+    dplyr::mutate(data = purrr::map(data, ~add_loess(.)))
+  
+  # write (complemented) data to file
+  readr::write_rds(df, 
+                   paste0(tempdir(), 
+                          "/demo_data_2017_ilon_", 
+                          ilon,
+                          "_COMPLEMENTED.rds"))
+}
+```
+
+## Distribute jobs
+
+Write an R script that distributes jobs for parallel computation, where each job processes data of one chunk and makes a number of calls to `add_loess_byilon()`. For example, if we have 30 longitudinal bands and 3 chunks, each chunk makes 10 calls. Write this script so that it can be run from the shell and that it can deal with three arguments:
+
+- an index for the chunk
+- the total number of chunks
+- the total number of longitudinal bands
+
+Such an R script would look like this:
+```{r eval=FALSE}
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)   # to receive arguments from the shell
+
+library(map2tidy)
+
+source(paste0(here::here(), "/R/add_loess_byilon.R"))
+
+print("getting data for longitude indices:")
+vec_index <- map2tidy::get_index_by_chunk(as.integer(args[1]), 
+                                          as.integer(args[2]), 
+                                          as.integer(args[3]))
+
+# get all available cores
+ncores <- 3 # parallel::detectCores()
+
+# set up the cluster, sending required objects to each core
+cl <- multidplyr::new_cluster(ncores) %>%
+  multidplyr::cluster_library(c("map2tidy",
+                                "dplyr", 
+                                "purrr", 
+                                "tidyr", 
+                                "readr",
+                                "here",
+                                "magrittr")) %>%
+  multidplyr::cluster_assign(add_loess_byilon = add_loess_byilon)
+
+# distribute computation across the cores, calculating for all longitudinal 
+# indices of this chunk
+out <- tibble(ilon = vec_index) %>%
+  multidplyr::partition(cl) %>%
+  dplyr::mutate(out = purrr::map( ilon,
+                                  ~add_loess_byilon(.)))
+```
+Save the sript as `analysis/add_loess_bychunk.R`.
+
+An example shell script to send four jobs on HPC (here: ETH Euler) looks like this:
+```{sh eval = FALSE}
+#!/bin/bash
+njobs=4
+nlon=30
+for ((n=1;n<=${njobs};n++)); do
+    echo "Submitting chunk number $n ..."
+    bsub -W 72:00 -u bestocke -J "job_name $n" -R "rusage[mem=10000]" "Rscript vanilla analysis/add_loess_bychunk.R $n $njobs $nlon"
+done
+```
