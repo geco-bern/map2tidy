@@ -65,6 +65,9 @@
 <li>
       <a href="../articles/map2tidy_example.html">map2tidy functionality</a>
     </li>
+    <li>
+      <a href="../articles/parallel_computation.html">Parallel computation on large data</a>
+    </li>
   </ul>
 </li>
         
@@ -85,7 +88,7 @@
                         <h4 data-toc-skip class="author">Beni
 Stocker</h4>
             
-            <h4 data-toc-skip class="date">2023-11-02</h4>
+            <h4 data-toc-skip class="date">2023-11-03</h4>
       
       
       <div class="hidden name"><code>map2tidy_example.Rmd</code></div>
@@ -187,7 +190,10 @@ separate files, placed in a directory as specified by the argument
 <h3 id="parallelisation">Parallelisation<a class="anchor" aria-label="anchor" href="#parallelisation"></a>
 </h3>
 <p>This process can be parallelised by setting the argument
-<code>ncores = 3</code> (or to another suitable number of cores).</p>
+<code>ncores = 3</code> (or to another suitable number of cores) and
+“chunking” the data processing. This writes output to files for each
+longitudinal band (Note: May implement output writing for each chunk
+instead in the future).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/map2tidy.html">map2tidy</a></span><span class="op">(</span></span>
 <span>  nclist <span class="op">=</span> <span class="va">files</span>, </span>
@@ -196,6 +202,7 @@ separate files, placed in a directory as specified by the argument
 <span>  latnam <span class="op">=</span> <span class="st">"lat"</span>, </span>
 <span>  timenam <span class="op">=</span> <span class="st">"time"</span>, </span>
 <span>  timedimnam <span class="op">=</span> <span class="st">"time"</span>,</span>
+<span>  do_chunks <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  outdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span>
 <span>  fileprefix <span class="op">=</span> <span class="st">"demo_data_2017"</span>, </span>
 <span>  ncores <span class="op">=</span> <span class="fl">3</span>,</span>

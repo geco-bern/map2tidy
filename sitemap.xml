@@ -13,10 +13,16 @@
     <loc>/articles/map2tidy_example.html</loc>
   </url>
   <url>
+    <loc>/articles/parallel_computation.html</loc>
+  </url>
+  <url>
     <loc>/authors.html</loc>
   </url>
   <url>
     <loc>/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_index_by_chunk.html</loc>
   </url>
   <url>
     <loc>/reference/index.html</loc>
