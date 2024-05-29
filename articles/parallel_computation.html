@@ -249,13 +249,13 @@ three arguments:</p>
 <p>Save the sript as <code>analysis/add_loess_bychunk.R</code>.</p>
 <p>An example shell script to send four jobs on HPC (here: ETH Euler)
 looks like this:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">njobs</span><span class="op">=</span>4</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="va">nlon</span><span class="op">=</span>30</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="kw">((</span><span class="va">n</span><span class="op">=</span><span class="dv">1</span><span class="kw">;</span><span class="va">n</span><span class="op">&lt;=</span><span class="va">${njobs}</span><span class="kw">;</span><span class="va">n</span><span class="op">++</span><span class="kw">));</span> <span class="cf">do</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">"Submitting chunk number </span><span class="va">$n</span><span class="st"> ..."</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="ex">bsub</span> <span class="at">-W</span> 72:00 <span class="at">-u</span> bestocke <span class="at">-J</span> <span class="st">"job_name </span><span class="va">$n</span><span class="st">"</span> <span class="at">-R</span> <span class="st">"rusage[mem=10000]"</span> <span class="st">"Rscript vanilla analysis/add_loess_bychunk.R </span><span class="va">$n</span><span class="st"> </span><span class="va">$njobs</span><span class="st"> </span><span class="va">$nlon</span><span class="st">"</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="va">njobs</span><span class="op">=</span>4</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="va">nlon</span><span class="op">=</span>30</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="cf">for</span> <span class="kw">((</span><span class="va">n</span><span class="op">=</span><span class="dv">1</span><span class="kw">;</span><span class="va">n</span><span class="op">&lt;=</span><span class="va">${njobs}</span><span class="kw">;</span><span class="va">n</span><span class="op">++</span><span class="kw">));</span> <span class="cf">do</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">"Submitting chunk number </span><span class="va">$n</span><span class="st"> ..."</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="ex">bsub</span> <span class="at">-W</span> 72:00 <span class="at">-u</span> bestocke <span class="at">-J</span> <span class="st">"job_name </span><span class="va">$n</span><span class="st">"</span> <span class="at">-R</span> <span class="st">"rusage[mem=10000]"</span> <span class="st">"Rscript vanilla analysis/add_loess_bychunk.R </span><span class="va">$n</span><span class="st"> </span><span class="va">$njobs</span><span class="st"> </span><span class="va">$nlon</span><span class="st">"</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
 </div>
   </div>
 
