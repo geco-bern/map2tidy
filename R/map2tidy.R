@@ -85,6 +85,7 @@ map2tidy <- function(
   if (single_basedate && is.na(fgetdate)){
     # get base date (to interpret time units in 'days since X')
     basedate <- ncmeta::nc_atts(nclist[1], timenam) %>%
+      dplyr::filter(name != "FillValue") %>%
       tidyr::unnest(cols = c("value")) %>%
       dplyr::filter("name" == "units") %>%
       dplyr::pull("value") %>%
