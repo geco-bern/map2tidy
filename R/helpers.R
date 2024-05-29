@@ -145,7 +145,8 @@ nclist_to_df_byfil <- function(
   if (is.na(basedate) && is.na(fgetdate)){
     # get base date (to interpret time units in 'days since X')
     basedate <- ncmeta::nc_atts(filnam, timenam) %>%
-      tidyr::unnest(cols = c(value)) %>%
+      dplyr::filter(name != "_FillValue") %>%
+      tidyr::unnest(cols = c("value")) %>%
       dplyr::filter(name == "units") %>%
       dplyr::pull(value) %>%
       stringr::str_remove("days since ") %>%
@@ -176,7 +177,7 @@ nclist_to_df_byfil <- function(
     } else {
       df <- df %>%
         dplyr::rename(time = !!timedimnam, lon = !!lonnam, lat = !!latnam) %>%
-        dplyr::mutate(time = basedate + lubridate::days(time)) #  - lubridate::days(1)
+        dplyr::mutate(time = basedate + lubridate::days(floor(time))) #  - lubridate::days(1)
 
     }
 
