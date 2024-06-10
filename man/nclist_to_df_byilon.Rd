@@ -15,6 +15,7 @@ nclist_to_df_byilon(
   basedate,
   timenam,
   timedimnam,
+  noleap,
   fgetdate,
   overwrite
 )
@@ -45,10 +46,15 @@ files.}
 \item{basedate}{not sure}
 
 \item{timenam}{The name of dimension variable used for timein the NetCDF
-files. Defaults to \code{"time"}.}
+files. Defaults to \code{NA}.}
 
 \item{timedimnam}{The name of the dimension (axis) used for time.
-Defaults to \code{"time"}.}
+Defaults to \code{NA}.}
+
+\item{noleap}{A logical specifying whether the calendar of the NetCDF time
+axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
+Defaults to \code{NA} - no prior information specified and dynamically inter-
+preted from NetCDF file.}
 
 \item{fgetdate}{A function to derive the date used for the time dimension
 based on the file name.}

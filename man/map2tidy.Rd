@@ -9,8 +9,9 @@ map2tidy(
   varnam,
   lonnam = "lon",
   latnam = "lat",
-  timenam = "time",
-  timedimnam = "time",
+  timenam = NA,
+  timedimnam = NA,
+  noleap = FALSE,
   do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
@@ -32,10 +33,15 @@ files.}
 \item{latnam}{The dimension name of latitude in the NetCDF files.}
 
 \item{timenam}{The name of dimension variable used for timein the NetCDF
-files. Defaults to \code{"time"}.}
+files. Defaults to \code{NA}.}
 
 \item{timedimnam}{The name of the dimension (axis) used for time.
-Defaults to \code{"time"}.}
+Defaults to \code{NA}.}
+
+\item{noleap}{A logical specifying whether the calendar of the NetCDF time
+axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
+Defaults to \code{NA} - no prior information specified and dynamically inter-
+preted from NetCDF file.}
 
 \item{do_chunks}{A logical specifying whether chunks of data should be
 written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the

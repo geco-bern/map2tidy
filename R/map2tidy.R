@@ -12,9 +12,13 @@
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #' @param latnam The dimension name of latitude in the NetCDF files.
 #' @param timenam The name of dimension variable used for timein the NetCDF
-#' files. Defaults to \code{"time"}.
+#' files. Defaults to \code{NA}.
 #' @param timedimnam The name of the dimension (axis) used for time.
-#' Defaults to \code{"time"}.
+#' Defaults to \code{NA}.
+#' @param noleap A logical specifying whether the calendar of the NetCDF time
+#' axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
+#' Defaults to \code{NA} - no prior information specified and dynamically inter-
+#' preted from NetCDF file.
 #' @param do_chunks A logical specifying whether chunks of data should be
 #' written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
 #' arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
@@ -38,7 +42,6 @@
 #'
 #' @importFrom utils data
 #' @importFrom stats time
-#' @importFrom magrittr %>%
 #'
 #' @return Nothing. Writes data to .rds files for each longitude index.
 #' @export
@@ -48,8 +51,9 @@ map2tidy <- function(
   varnam,
   lonnam = "lon",
   latnam = "lat",
-  timenam = "time",
-  timedimnam = "time",
+  timenam = NA,
+  timedimnam = NA,
+  noleap = FALSE,
   do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
@@ -76,22 +80,34 @@ map2tidy <- function(
     }
 
     # open one file to get longitude information: length of longitude dimension
-    nlon <- ncmeta::nc_dim(nclist[1], lonnam) %>%
+    nlon <- ncmeta::nc_dim(nclist[1], lonnam) |>
       dplyr::pull(length)
 
     ilon <- seq(nlon)
   }
 
-  if (single_basedate && is.na(fgetdate)){
+  # determine if netcdf file has a calendar with or without leap years
+  if (identical(noleap, NA)){
+    calendar <- ncmeta::nc_atts(nclist[1], timenam) |>
+      dplyr::filter(name == "calendar") |>
+      dplyr::pull(value)
+    if (calendar %in% c("noleap", "no_leap")){
+      noleap <- TRUE
+    } else {
+      noleap <- FALSE
+    }
+  }
+
+  if (single_basedate && is.na(fgetdate) && !is.na(timenam)){
     # get base date (to interpret time units in 'days since X')
-    basedate <- ncmeta::nc_atts(nclist[1], timenam) %>%
-      dplyr::filter(name != "_FillValue") %>%
-      tidyr::unnest(cols = c("value")) %>%
-      dplyr::filter(name == "units") %>%
-      dplyr::pull("value") %>%
-      stringr::str_remove("days since ") %>%
-      stringr::str_remove(" 00:00:00") %>%
-      stringr::str_remove(" 0:0:0") %>%
+    basedate <- ncmeta::nc_atts(nclist[1], timenam) |>
+      dplyr::filter(name != "_FillValue") |>
+      tidyr::unnest(cols = c("value")) |>
+      dplyr::filter(name == "units") |>
+      dplyr::pull("value") |>
+      stringr::str_remove("days since ") |>
+      stringr::str_remove(" 00:00:00") |>
+      stringr::str_remove(" 0:0:0") |>
       lubridate::ymd()
   } else {
     basedate <- NA
@@ -106,25 +122,26 @@ map2tidy <- function(
   if (ncores > 1 && length(ilon) > 1){
 
     # chunking by longitude and sending to cluster for parallelisation
-    cl <- multidplyr::new_cluster(ncores) %>%
-      multidplyr::cluster_library(c("dplyr", "purrr", "tidyr", "tidync", "dplyr", "magrittr")) %>%
-      multidplyr::cluster_assign(nclist = nclist) %>%
-      multidplyr::cluster_assign(outdir = outdir) %>%
-      multidplyr::cluster_assign(fileprefix = fileprefix) %>%
-      multidplyr::cluster_assign(varnam = varnam) %>%
-      multidplyr::cluster_assign(lonnam = lonnam) %>%
-      multidplyr::cluster_assign(latnam = latnam) %>%
-      multidplyr::cluster_assign(basedate = basedate) %>%
-      multidplyr::cluster_assign(timenam = timenam) %>%
-      multidplyr::cluster_assign(timedimnam = timedimnam) %>%
-      multidplyr::cluster_assign(fgetdate = fgetdate) %>%
-      multidplyr::cluster_assign(overwrite = overwrite) %>%
-      multidplyr::cluster_assign(nclist_to_df_byilon = nclist_to_df_byilon) %>%
+    cl <- multidplyr::new_cluster(ncores) |>
+      multidplyr::cluster_library(c("dplyr", "purrr", "tidyr", "tidync", "dplyr", "magrittr")) |>
+      multidplyr::cluster_assign(nclist = nclist) |>
+      multidplyr::cluster_assign(outdir = outdir) |>
+      multidplyr::cluster_assign(fileprefix = fileprefix) |>
+      multidplyr::cluster_assign(varnam = varnam) |>
+      multidplyr::cluster_assign(lonnam = lonnam) |>
+      multidplyr::cluster_assign(latnam = latnam) |>
+      multidplyr::cluster_assign(basedate = basedate) |>
+      multidplyr::cluster_assign(timenam = timenam) |>
+      multidplyr::cluster_assign(timedimnam = timedimnam) |>
+      multidplyr::cluster_assign(noleap = noleap) |>
+      multidplyr::cluster_assign(fgetdate = fgetdate) |>
+      multidplyr::cluster_assign(overwrite = overwrite) |>
+      multidplyr::cluster_assign(nclist_to_df_byilon = nclist_to_df_byilon) |>
       multidplyr::cluster_assign(nclist_to_df_byfil = nclist_to_df_byfil)
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
-    out <- dplyr::tibble(ilon = ilon) %>%
-      multidplyr::partition(cl) %>%
+    out <- dplyr::tibble(ilon = ilon) |>
+      multidplyr::partition(cl) |>
       dplyr::mutate(
         out = purrr::map_int(
           ilon,
@@ -139,6 +156,7 @@ map2tidy <- function(
             basedate,
             timenam,
             timedimnam,
+            noleap,
             fgetdate,
             overwrite
             )
@@ -161,8 +179,10 @@ map2tidy <- function(
         basedate,
         timenam,
         timedimnam,
+        noleap,
         fgetdate,
-        overwrite))
+        overwrite
+        ))
 
   } else {
 
@@ -178,6 +198,7 @@ map2tidy <- function(
         latnam,
         timenam,
         timedimnam,
+        noleap,
         fgetdate))
 
     if (!is.na(outdir)){
