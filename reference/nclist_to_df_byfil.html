@@ -74,6 +74,7 @@ band</p>
 <span>  <span class="va">latnam</span>,</span>
 <span>  <span class="va">timenam</span>,</span>
 <span>  <span class="va">timedimnam</span>,</span>
+<span>  <span class="va">noleap</span>,</span>
 <span>  <span class="va">fgetdate</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -117,6 +118,13 @@ files. Defaults to <code>"time"</code>.</p></dd>
 <dt>timedimnam</dt>
 <dd><p>The name of the dimension (axis) used for time.
 Defaults to <code>"time"</code>.</p></dd>
+
+
+<dt>noleap</dt>
+<dd><p>A logical specifying whether the calendar of the NetCDF time
+axis contains leap years. If it doesn't, <code>noleap</code> is <code>TRUE</code>.
+Defaults to <code>NA</code> - no prior information specified and dynamically inter-
+preted from NetCDF file.</p></dd>
 
 
 <dt>fgetdate</dt>

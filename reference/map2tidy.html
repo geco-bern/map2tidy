@@ -74,8 +74,9 @@ data.</p>
 <span>  <span class="va">varnam</span>,</span>
 <span>  lonnam <span class="op">=</span> <span class="st">"lon"</span>,</span>
 <span>  latnam <span class="op">=</span> <span class="st">"lat"</span>,</span>
-<span>  timenam <span class="op">=</span> <span class="st">"time"</span>,</span>
-<span>  timedimnam <span class="op">=</span> <span class="st">"time"</span>,</span>
+<span>  timenam <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  timedimnam <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  noleap <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  do_chunks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  outdir <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  fileprefix <span class="op">=</span> <span class="cn">NA</span>,</span>
@@ -108,12 +109,19 @@ files.</p></dd>
 
 <dt>timenam</dt>
 <dd><p>The name of dimension variable used for timein the NetCDF
-files. Defaults to <code>"time"</code>.</p></dd>
+files. Defaults to <code>NA</code>.</p></dd>
 
 
 <dt>timedimnam</dt>
 <dd><p>The name of the dimension (axis) used for time.
-Defaults to <code>"time"</code>.</p></dd>
+Defaults to <code>NA</code>.</p></dd>
+
+
+<dt>noleap</dt>
+<dd><p>A logical specifying whether the calendar of the NetCDF time
+axis contains leap years. If it doesn't, <code>noleap</code> is <code>TRUE</code>.
+Defaults to <code>NA</code> - no prior information specified and dynamically inter-
+preted from NetCDF file.</p></dd>
 
 
 <dt>do_chunks</dt>
