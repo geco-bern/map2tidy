@@ -75,6 +75,7 @@ band</p>
 <span>  <span class="va">timenam</span>,</span>
 <span>  <span class="va">timedimnam</span>,</span>
 <span>  <span class="va">noleap</span>,</span>
+<span>  <span class="va">res_time</span>,</span>
 <span>  <span class="va">fgetdate</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -125,6 +126,11 @@ Defaults to <code>"time"</code>.</p></dd>
 axis contains leap years. If it doesn't, <code>noleap</code> is <code>TRUE</code>.
 Defaults to <code>NA</code> - no prior information specified and dynamically inter-
 preted from NetCDF file.</p></dd>
+
+
+<dt>res_time</dt>
+<dd><p>A character specifying the resolution of the time axis.
+Available: <code>c("mon", "day")</code>. Defaults to <code>"day"</code>.</p></dd>
 
 
 <dt>fgetdate</dt>
