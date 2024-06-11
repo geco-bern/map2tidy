@@ -215,13 +215,19 @@ nclist_to_df_byfil <- function(
           df_noleap <- tibble(
             time = seq(from = basedate, to = lubridate::ymd(paste0(last_year , "-12-31")), by = "days")
           ) |>
-            mutate(month = lubridate::month(date), mday = lubridate::mday(time)) |>
-            filter(!(month == 2 & mday == 29))
+            dplyr::mutate(month = lubridate::month(date), mday = lubridate::mday(time)) |>
+            dplyr::filter(!(month == 2 & mday == 29))
+
+          if (res_time == "mon"){
+            # monthly resolution - interpret for the 15th of each month
+            df_noleap <- df_noleap |>
+              dplyr::filter(mday == 15)
+          }
 
           # at this stage, number of rows in df_noleap should correspond to length of the time dimension in netcdf file
           df <- df |>
-            select(-!!timedimnam) |>
-            bind_cols(
+            dplyr::select(-!!timedimnam) |>
+            dplyr::bind_cols(
               df_noleap
             ) |>
             dplyr::rename(lon = !!lonnam, lat = !!latnam)
