@@ -19,6 +19,8 @@
 #' axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
 #' Defaults to \code{NA} - no prior information specified and dynamically inter-
 #' preted from NetCDF file.
+#' @param res_time A character specifying the resolution of the time axis.
+#' Available: \code{c("mon", "day")}. Defaults to \code{"day"}.
 #' @param do_chunks A logical specifying whether chunks of data should be
 #' written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
 #' arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
@@ -54,6 +56,7 @@ map2tidy <- function(
   timenam = NA,
   timedimnam = NA,
   noleap = FALSE,
+  res_time = "day",
   do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
@@ -134,6 +137,7 @@ map2tidy <- function(
       multidplyr::cluster_assign(timenam = timenam) |>
       multidplyr::cluster_assign(timedimnam = timedimnam) |>
       multidplyr::cluster_assign(noleap = noleap) |>
+      multidplyr::cluster_assign(res_time = res_time) |>
       multidplyr::cluster_assign(fgetdate = fgetdate) |>
       multidplyr::cluster_assign(overwrite = overwrite) |>
       multidplyr::cluster_assign(nclist_to_df_byilon = nclist_to_df_byilon) |>
@@ -157,6 +161,7 @@ map2tidy <- function(
             timenam,
             timedimnam,
             noleap,
+            res_time,
             fgetdate,
             overwrite
             )
@@ -180,6 +185,7 @@ map2tidy <- function(
         timenam,
         timedimnam,
         noleap,
+        res_time,
         fgetdate,
         overwrite
         ))
@@ -199,6 +205,7 @@ map2tidy <- function(
         timenam,
         timedimnam,
         noleap,
+        res_time,
         fgetdate))
 
     if (!is.na(outdir)){

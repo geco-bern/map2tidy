@@ -12,6 +12,7 @@ map2tidy(
   timenam = NA,
   timedimnam = NA,
   noleap = FALSE,
+  res_time = "day",
   do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
@@ -42,6 +43,9 @@ Defaults to \code{NA}.}
 axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
 Defaults to \code{NA} - no prior information specified and dynamically inter-
 preted from NetCDF file.}
+
+\item{res_time}{A character specifying the resolution of the time axis.
+Available: \code{c("mon", "day")}. Defaults to \code{"day"}.}
 
 \item{do_chunks}{A logical specifying whether chunks of data should be
 written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the

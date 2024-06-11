@@ -16,6 +16,7 @@ nclist_to_df_byilon(
   timenam,
   timedimnam,
   noleap,
+  res_time,
   fgetdate,
   overwrite
 )
@@ -55,6 +56,9 @@ Defaults to \code{NA}.}
 axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
 Defaults to \code{NA} - no prior information specified and dynamically inter-
 preted from NetCDF file.}
+
+\item{res_time}{A character specifying the resolution of the time axis.
+Available: \code{c("mon", "day")}. Defaults to \code{"day"}.}
 
 \item{fgetdate}{A function to derive the date used for the time dimension
 based on the file name.}
