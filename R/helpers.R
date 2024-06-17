@@ -223,7 +223,8 @@ nclist_to_df_byfil <- function(
             time = seq(from = basedate, to = lubridate::ymd(paste0(last_year , "-12-31")), by = "days")
           ) |>
             dplyr::mutate(month = lubridate::month(time), mday = lubridate::mday(time)) |>
-            dplyr::filter(!(month == 2 & mday == 29))
+            dplyr::filter(!(month == 2 & mday == 29)) |>
+            dplyr::mutate(days_since = as.integer(1:n() - 1))
 
           if (res_time == "mon"){
             # monthly resolution - interpret for the 15th of each month
@@ -231,25 +232,16 @@ nclist_to_df_byfil <- function(
               dplyr::filter(mday == 15)
           }
 
-          # repeat data frame with dates and without leap years and stack along rows
-          nlat <- length(unique(df$lat))
-          df_noleap <- replicate(
-            nlat,
-            df_noleap,
-            simplify = FALSE) |>
-            dplyr::bind_rows()
-
-          # re-organise df to vary fastest by time (not lat)
           df <- df |>
-            dplyr::arrange(lat)
-
-          # at this stage, number of rows in df_noleap should correspond to length of the time dimension in netcdf file
-          df <- df |>
-            dplyr::select(-!!timedimnam) |>
-            dplyr::bind_cols(
-              df_noleap
+            mutate(time = as.integer(time)) |>
+            left_join(
+              df_noleap |>
+                rename(date = time) |>
+                rename(time = days_since),
+              by = "time"
             ) |>
-            dplyr::rename(lon = !!lonnam, lat = !!latnam)
+            dplyr::select(-month, -mday, -time) |>
+            dplyr::rename(time = date)
 
         } else {
           df <- df |>
