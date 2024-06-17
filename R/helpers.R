@@ -215,14 +215,14 @@ nclist_to_df_byfil <- function(
         if (noleap){
           # if calendar of netcdf time dimension is no-leap, then do...
           # determine last year in file.
-          last_date <- basedate + lubridate::days(floor(time[length(time)])) - lubridate::days(1)
+          last_date <- basedate + lubridate::days(floor(df$time[length(df$time)])) - lubridate::days(1)
           last_year <- lubridate::year(last_date)
 
           # "manually" remove additional day in leap years
           df_noleap <- tibble(
             time = seq(from = basedate, to = lubridate::ymd(paste0(last_year , "-12-31")), by = "days")
           ) |>
-            dplyr::mutate(month = lubridate::month(date), mday = lubridate::mday(time)) |>
+            dplyr::mutate(month = lubridate::month(time), mday = lubridate::mday(time)) |>
             dplyr::filter(!(month == 2 & mday == 29))
 
           if (res_time == "mon"){
@@ -230,6 +230,18 @@ nclist_to_df_byfil <- function(
             df_noleap <- df_noleap |>
               dplyr::filter(mday == 15)
           }
+
+          # repeat data frame with dates and without leap years and stack along rows
+          nlat <- length(unique(df$lat))
+          df_noleap <- replicate(
+            nlat,
+            df_noleap,
+            simplify = FALSE) |>
+            dplyr::bind_rows()
+
+          # re-organise df to vary fastest by time (not lat)
+          df <- df |>
+            dplyr::arrange(lat)
 
           # at this stage, number of rows in df_noleap should correspond to length of the time dimension in netcdf file
           df <- df |>
