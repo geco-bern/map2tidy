@@ -188,19 +188,36 @@ nclist_to_df_byfil <- function(
 
   } else {
     # subset data to longitudinal band
-    df <- tidync::tidync(filnam) |>
-      tidync::hyper_filter(lon = dplyr::near(index, ilon)) |>
+    ncdf <- tidync::tidync(filnam)
+
+    # check if requested dimensions and variables exist
+    ncdf_available_dims <- tidync::hyper_dims(ncdf)
+    ncdf_available_vars <- tidync::hyper_vars(ncdf)
+    err_msg_lon <- sprintf(
+      "For file %s:\n  Provided name of longitudinal dimension as %s, which is not among available dims: %s",
+      filnam, # basename(filnam),
+      lonnam, paste0(ncdf_available_dims$name, collapse = ","))
+    err_msg_var <- sprintf(
+      "For file %s:\n  Requested variable '%s', which is not among available variables: %s",
+      filnam, # basename(filnam),
+      varnam, paste0(ncdf_available_vars$name, collapse = ","))
+    lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
+    varnam %in% ncdf_available_vars$name || stop(err_msg_var)
+
+    # Deal with dynamic longitude dimension name
+    if (lonnam == "lon"){
+      ncdf <- tidync::hyper_filter(ncdf, lon = dplyr::near(index, ilon))
+    } else if (lonnam == "longitude"){
+      ncdf <- tidync::hyper_filter(ncdf, longitude = dplyr::near(index, ilon))
+    } else {
+      stop(sprintf("Received lonnam argument: '%s'. Currently only 'lon' or 'longitude' are supported by map2tidy. Your case needs to be added.", lonnam))
+    }
+
+    # collect data into tibble
+    df <- ncdf |>
       tidync::hyper_tibble(tidyselect::vars_pull(varnam))
 
-    # # Deal with dynamic longitude dimension name
-    # df <- tidync::tidync(filnam) |>
-    #   tidync::hyper_tibble(tidyselect::vars_pull(varnam))
     #
-    # lon_vec <- sort(unique(df[[lonnam]]))
-    # lon_select <- lon_vec[ilon]
-    #
-    # df <- df |>
-    #   dplyr::filter(!!lonnam == lon_select)
   }
 
   if (nrow(df)>0){
