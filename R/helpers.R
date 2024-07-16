@@ -219,12 +219,12 @@ nclist_to_df_byfil <- function(
           last_year <- lubridate::year(last_date)
 
           # "manually" remove additional day in leap years
-          df_noleap <- tibble(
+          df_noleap <- tibble::tibble(
             time = seq(from = basedate, to = lubridate::ymd(paste0(last_year , "-12-31")), by = "days")
           ) |>
             dplyr::mutate(month = lubridate::month(time), mday = lubridate::mday(time)) |>
             dplyr::filter(!(month == 2 & mday == 29)) |>
-            dplyr::mutate(days_since = as.integer(1:n() - 1))
+            dplyr::mutate(days_since = as.integer(1:dplyr::n() - 1))
 
           if (res_time == "mon"){
             # monthly resolution - interpret for the 15th of each month
@@ -233,11 +233,11 @@ nclist_to_df_byfil <- function(
           }
 
           df <- df |>
-            mutate(time = as.integer(time)) |>
-            left_join(
+            dplyr::mutate(time = as.integer(time)) |>
+            dplyr::left_join(
               df_noleap |>
-                rename(date = time) |>
-                rename(time = days_since),
+                dplyr::rename(date = time) |>
+                dplyr::rename(time = days_since),
               by = "time"
             ) |>
             dplyr::select(-month, -mday, -time) |>
