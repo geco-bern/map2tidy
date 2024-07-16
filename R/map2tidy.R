@@ -77,9 +77,7 @@ map2tidy <- function(
 
     # check if necessary arguments are provided
     if (identical(NA, outdir) || identical(NA, fileprefix)){
-      warning("Error: arguments outdir and fileprefix must be specified when
-              do_chunks is TRUE.")
-      return()
+      stop("Error: arguments outdir and fileprefix must be specified when do_chunks is TRUE.")
     }
 
     # open one file to get longitude information: length of longitude dimension
