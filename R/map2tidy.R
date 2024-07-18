@@ -83,9 +83,10 @@ map2tidy <- function(
     # open one file to get longitude information: length of longitude dimension
     nlon <- ncmeta::nc_dim(nclist[1], lonnam) |>
       dplyr::pull(length)
-
-    ilon <- seq(nlon)
+  } else {
+    nlon <- 1
   }
+  ilon <- seq(nlon)
 
   # determine if netcdf file has a calendar with or without leap years
   if (identical(noleap, NA)){
@@ -120,26 +121,34 @@ map2tidy <- function(
 
   # collect time series per longitude slice and create separate files per longitude slice.
   # This step can be parallelized (dependecies: tidync, dplyr, tidyr, purrr, magrittr)
+  message(paste0("Create tidy dataframes for following NetCDF map files:\n    ",
+                 paste0(nclist, collapse = ",\n    "),
+                 "\nand extract (for ", ifelse(length(ilon) == 1,
+                                              "1 spatial chunk",
+                                              sprintf("spatial chunks %d to %d", min(ilon), max(ilon))),
+                 ") variable(s): ", paste0(varnam, collapse = ","), "."))
+
   if (ncores > 1 && length(ilon) > 1){
 
     # chunking by longitude and sending to cluster for parallelisation
     cl <- multidplyr::new_cluster(ncores) |>
       multidplyr::cluster_library(c("dplyr", "purrr", "tidyr", "tidync", "dplyr", "magrittr")) |>
-      multidplyr::cluster_assign(nclist = nclist) |>
-      multidplyr::cluster_assign(outdir = outdir) |>
-      multidplyr::cluster_assign(fileprefix = fileprefix) |>
-      multidplyr::cluster_assign(varnam = varnam) |>
-      multidplyr::cluster_assign(lonnam = lonnam) |>
-      multidplyr::cluster_assign(latnam = latnam) |>
-      multidplyr::cluster_assign(basedate = basedate) |>
-      multidplyr::cluster_assign(timenam = timenam) |>
-      multidplyr::cluster_assign(timedimnam = timedimnam) |>
-      multidplyr::cluster_assign(noleap = noleap) |>
-      multidplyr::cluster_assign(res_time = res_time) |>
-      multidplyr::cluster_assign(fgetdate = fgetdate) |>
-      multidplyr::cluster_assign(overwrite = overwrite) |>
-      multidplyr::cluster_assign(nclist_to_df_byilon = nclist_to_df_byilon) |>
-      multidplyr::cluster_assign(nclist_to_df_byfil = nclist_to_df_byfil)
+      multidplyr::cluster_assign(
+        nclist              = nclist,
+        outdir              = outdir,
+        fileprefix          = fileprefix,
+        varnam              = varnam,
+        lonnam              = lonnam,
+        latnam              = latnam,
+        basedate            = basedate,
+        timenam             = timenam,
+        timedimnam          = timedimnam,
+        noleap              = noleap,
+        res_time            = res_time,
+        fgetdate            = fgetdate,
+        overwrite           = overwrite,
+        nclist_to_df_byilon = nclist_to_df_byilon,
+        nclist_to_df_byfil  = nclist_to_df_byfil)
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
     out <- dplyr::tibble(ilon = ilon) |>
@@ -147,7 +156,7 @@ map2tidy <- function(
       dplyr::mutate(
         out = purrr::map_int(
           ilon,
-          ~nclist_to_df_byilon(
+          ~map2tidy::nclist_to_df_byilon(
             nclist,
             .,
             outdir,
