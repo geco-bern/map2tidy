@@ -14,8 +14,6 @@
 #' axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
 #' Defaults to \code{NA} - no prior information specified and dynamically inter-
 #' preted from NetCDF file.
-#' @param res_time A character specifying the resolution of the time axis.
-#' Available: \code{c("mon", "day")}. Defaults to \code{"day"}.
 #' @param outdir A character string specifying output directory where data
 #' frames are written using the \code{save} statement. If omitted (defaults to
 #' \code{NA}), a tidy data frame containing all data is returned.
@@ -46,7 +44,6 @@ nclist_to_df_byilon <- function(
     timenam,
     timedimnam,
     noleap,
-    res_time,
     fgetdate,
     overwrite
 ){
@@ -76,7 +73,6 @@ nclist_to_df_byilon <- function(
                           timenam = timenam,
                           timedimnam = timedimnam,
                           noleap = noleap,
-                          res_time = res_time,
                           fgetdate
       )
     )
@@ -143,8 +139,6 @@ nclist_to_df_byilon <- function(
 #' axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
 #' Defaults to \code{NA} - no prior information specified and dynamically inter-
 #' preted from NetCDF file.
-#' @param res_time A character specifying the resolution of the time axis.
-#' Available: \code{c("mon", "day")}. Defaults to \code{"day"}.
 #' @param fgetdate A function to derive the date used for the time dimension
 #' based on the file name.
 #'
@@ -161,7 +155,6 @@ nclist_to_df_byfil <- function(
     timenam,
     timedimnam,
     noleap,
-    res_time,
     fgetdate
 ){
 
@@ -243,11 +236,6 @@ nclist_to_df_byfil <- function(
             dplyr::filter(!(month == 2 & mday == 29)) |>
             dplyr::mutate(days_since = as.integer(1:dplyr::n() - 1))
 
-          if (res_time == "mon"){
-            # monthly resolution - interpret for the 15th of each month
-            df_noleap <- df_noleap |>
-              dplyr::filter(mday == 15)
-          }
 
           df <- df |>
             dplyr::mutate(time = as.integer(time)) |>
