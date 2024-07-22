@@ -174,14 +174,20 @@ nclist_to_df_byfil <- function(
   ncdf_available_dims <- tidync::hyper_dims(ncdf)
   ncdf_available_vars <- tidync::hyper_vars(ncdf)
   err_msg_lon <- sprintf(
-    "For file %s:\n  Provided name of longitudinal dimension as %s, which is not among available dims: %s",
-    filnam, # basename(filnam),
-    lonnam, paste0(ncdf_available_dims$name, collapse = ","))
+    "For file %s:\n  Provided name of longitudinal dimension as '%s', which is not among available dims: %s",
+    filnam, lonnam, paste0(ncdf_available_dims$name, collapse = ","))
+  err_msg_lat <- sprintf(
+    "For file %s:\n  Provided name of latitudinal dimension as '%s', which is not among available dims: %s",
+    filnam, latnam, paste0(ncdf_available_dims$name, collapse = ","))
+  err_msg_time <- sprintf(
+    "For file %s:\n  Provided name of time dimension as '%s', which is not among available dims: %s",
+    filnam, timenam, paste0(ncdf_available_dims$name, collapse = ","))
+  lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
+  latnam %in% ncdf_available_dims$name || stop(err_msg_lat)
+  timenam%in% ncdf_available_dims$name || stop(err_msg_time)
   err_msg_var <- sprintf(
     "For file %s:\n  Requested variable '%s', which is not among available variables: %s",
-    filnam, # basename(filnam),
-    varnam, paste0(ncdf_available_vars$name, collapse = ","))
-  lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
+    filnam, varnam, paste0(ncdf_available_vars$name, collapse = ","))
   varnam %in% ncdf_available_vars$name || stop(err_msg_var)
 
   # get data
