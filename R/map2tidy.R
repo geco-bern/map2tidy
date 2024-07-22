@@ -15,10 +15,6 @@
 #' files. Defaults to \code{NA}.
 #' @param timedimnam The name of the dimension (axis) used for time.
 #' Defaults to \code{NA}.
-#' @param noleap A logical specifying whether the calendar of the NetCDF time
-#' axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
-#' Defaults to \code{NA} - no prior information specified and dynamically inter-
-#' preted from NetCDF file.
 #' @param do_chunks A logical specifying whether chunks of data should be
 #' written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
 #' arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
@@ -32,9 +28,6 @@
 #' extraction of longitude slices). When set to \code{"all"}, the number of
 #' cores for parallelisation is determined by \code{parallel::detectCores()}.
 #' Defaults to \code{1} (no parallelisation).
-#' @param single_basedate A logical specifying whether all files in the file
-#' list have the same
-#' base date (e.g., time units given in 'days since <basedate>').
 #' @param fgetdate A function to derive the date used for the time dimension
 #' based on the file name.
 #' @param overwrite A logical indicating whether time series files are to be
@@ -43,7 +36,16 @@
 #' @importFrom utils data
 #' @importFrom stats time
 #'
-#' @return Nothing. Writes data to .rds files for each longitude index.
+#' @return Generates a tibble (containing columns 'lon' (double), 'lat' (double),
+#'         and nested column 'data'). Column 'data' contains requested variables
+#'         (probably as doubles) and potentially a datetime (as string). Note that
+#'         the datetime is defined by package CFtime and can contain dates such
+#'         as "2021-02-30", which are valid for 360-day calendars but not for
+#'         POSIXt. Because of that these dates need to be parsed separately.
+#'
+#'         The function either returns this tibble or
+#'         then (if out_dir is specified) returns nothing and writes the tibble
+#'         to .rds files for each longitude value.
 #' @export
 #'
 map2tidy <- function(
@@ -53,12 +55,10 @@ map2tidy <- function(
   latnam = "lat",
   timenam = NA,
   timedimnam = NA,
-  noleap = FALSE,
   do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
   ncores = 1,
-  single_basedate = FALSE,
   fgetdate = NA,
   overwrite = FALSE
   ){
@@ -78,39 +78,13 @@ map2tidy <- function(
     }
 
     # open one file to get longitude information: length of longitude dimension
-    nlon <- ncmeta::nc_dim(nclist[1], lonnam) |>
+    nlon <- tidync::hyper_dims(tidync::tidync(nclist[1])) |>
+      dplyr::filter(name == lonnam) |>
       dplyr::pull(length)
   } else {
     nlon <- 1
   }
   ilon <- seq(nlon)
-
-  # determine if netcdf file has a calendar with or without leap years
-  if (identical(noleap, NA)){
-    calendar <- ncmeta::nc_atts(nclist[1], timenam) |>
-      dplyr::filter(name == "calendar") |>
-      dplyr::pull(value)
-    if (calendar %in% c("noleap", "no_leap")){
-      noleap <- TRUE
-    } else {
-      noleap <- FALSE
-    }
-  }
-
-  if (single_basedate && is.na(fgetdate) && !is.na(timenam)){
-    # get base date (to interpret time units in 'days since X')
-    basedate <- ncmeta::nc_atts(nclist[1], timenam) |>
-      dplyr::filter(name != "_FillValue") |>
-      tidyr::unnest(cols = c("value")) |>
-      dplyr::filter(name == "units") |>
-      dplyr::pull("value") |>
-      stringr::str_remove("days since ") |>
-      stringr::str_remove(" 00:00:00") |>
-      stringr::str_remove(" 0:0:0") |>
-      lubridate::ymd()
-  } else {
-    basedate <- NA
-  }
 
   if (ncores=="all"){
     ncores <- parallel::detectCores()
@@ -137,10 +111,8 @@ map2tidy <- function(
         varnam              = varnam,
         lonnam              = lonnam,
         latnam              = latnam,
-        basedate            = basedate,
         timenam             = timenam,
         timedimnam          = timedimnam,
-        noleap              = noleap,
         fgetdate            = fgetdate,
         overwrite           = overwrite,
         nclist_to_df_byilon = nclist_to_df_byilon,
@@ -160,10 +132,8 @@ map2tidy <- function(
             varnam,
             lonnam,
             latnam,
-            basedate,
             timenam,
             timedimnam,
-            noleap,
             fgetdate,
             overwrite
             )
@@ -183,10 +153,8 @@ map2tidy <- function(
         varnam,
         lonnam,
         latnam,
-        basedate,
         timenam,
         timedimnam,
-        noleap,
         fgetdate,
         overwrite
         ))
@@ -199,13 +167,11 @@ map2tidy <- function(
       ~map2tidy::nclist_to_df_byfil(
         .,
         ilon = NA,
-        basedate,
         varnam,
         lonnam,
         latnam,
         timenam,
         timedimnam,
-        noleap,
         fgetdate))
 
     if (!is.na(outdir)){

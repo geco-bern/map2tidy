@@ -10,10 +10,6 @@
 #' files. Defaults to \code{NA}.
 #' @param timedimnam The name of the dimension (axis) used for time.
 #' Defaults to \code{NA}.
-#' @param noleap A logical specifying whether the calendar of the NetCDF time
-#' axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
-#' Defaults to \code{NA} - no prior information specified and dynamically inter-
-#' preted from NetCDF file.
 #' @param outdir A character string specifying output directory where data
 #' frames are written using the \code{save} statement. If omitted (defaults to
 #' \code{NA}), a tidy data frame containing all data is returned.
@@ -23,7 +19,6 @@
 #' it overrides that the function extracts data for all longitude indices. If
 #' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
 #' indexes.
-#' @param basedate not sure
 #' @param fgetdate A function to derive the date used for the time dimension
 #' based on the file name.
 #' @param overwrite A logical indicating whether time series files are to be
@@ -40,10 +35,8 @@ nclist_to_df_byilon <- function(
     varnam,
     lonnam,
     latnam,
-    basedate,
     timenam,
     timedimnam,
-    noleap,
     fgetdate,
     overwrite
 ){
@@ -66,13 +59,11 @@ nclist_to_df_byilon <- function(
       as.list(nclist),
       ~nclist_to_df_byfil(.,
                           ilon,
-                          basedate = basedate,
                           varnam = varnam,
                           lonnam = lonnam,
                           latnam = latnam,
                           timenam = timenam,
                           timedimnam = timedimnam,
-                          noleap = noleap,
                           fgetdate
       )
     )
@@ -126,7 +117,6 @@ nclist_to_df_byilon <- function(
 #' it overrides that the function extracts data for all longitude indices. If
 #' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
 #' indexes.
-#' @param basedate reference data for NetCDF time dimension
 #' @param varnam The variable name(s) for which data is to be read from NetCDF
 #' files.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
@@ -135,10 +125,6 @@ nclist_to_df_byilon <- function(
 #' files. Defaults to \code{"time"}.
 #' @param timedimnam The name of the dimension (axis) used for time.
 #' Defaults to \code{"time"}.
-#' @param noleap A logical specifying whether the calendar of the NetCDF time
-#' axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
-#' Defaults to \code{NA} - no prior information specified and dynamically inter-
-#' preted from NetCDF file.
 #' @param fgetdate A function to derive the date used for the time dimension
 #' based on the file name.
 #'
@@ -148,22 +134,21 @@ nclist_to_df_byilon <- function(
 nclist_to_df_byfil <- function(
     filnam,
     ilon = NA,
-    basedate,
     varnam,
     lonnam,
     latnam,
     timenam,
     timedimnam,
-    noleap,
     fgetdate
 ){
 
   # CRAN HACK, use .data$ syntax for correct fix
   index <- lat <- lon <- name <- value <- NULL
 
-  # check if requested dimensions and variables exist
+  # Setup extraction
   ncdf <- tidync::tidync(filnam)
 
+  # check if requested dimensions and variables exist
   ncdf_available_dims <- tidync::hyper_dims(ncdf)
   ncdf_available_vars <- tidync::hyper_vars(ncdf)
   err_msg_lon <- sprintf(
@@ -177,7 +162,7 @@ nclist_to_df_byfil <- function(
     filnam, timenam, paste0(ncdf_available_dims$name, collapse = ","))
   lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
   latnam %in% ncdf_available_dims$name || stop(err_msg_lat)
-  timenam%in% ncdf_available_dims$name || stop(err_msg_time)
+  timenam%in% ncdf_available_dims$name || is.na(timenam) || stop(err_msg_time)
   err_msg_var <- sprintf(
     "For file %s:\n  Requested variable '%s', which is not among available variables: %s",
     filnam, varnam, paste0(ncdf_available_vars$name, collapse = ","))
@@ -199,64 +184,67 @@ nclist_to_df_byfil <- function(
   }
   # collect data into tibble
   df <- ncdf |>
-    tidync::hyper_tibble(tidyselect::vars_pull(varnam))
+    tidync::hyper_tibble(tidyselect::vars_pull(varnam),
+                         drop=FALSE) |>
+    # hardcode: lon and lat as longitude and latitude
+    dplyr::rename(lon = !!lonnam, lat = !!latnam) |>
+    # transform to numeric
+    dplyr::mutate(lon = as.numeric(lon), lat = as.numeric(lat))
+  # NOTE: df based on tidync (< v.0.3.0.9002) contains integer time column
+  # NOTE: df based on tidync (>= v.0.3.0.9002) contains string time column
 
-  if (nrow(df)>0){
-      if (is.na(basedate) && is.na(fgetdate) && !is.na(timenam)){
-        # get base date (to interpret time units in 'days since X')
-        basedate <- ncmeta::nc_atts(filnam, timenam) |>
-          dplyr::filter(name != "_FillValue") |>
-          tidyr::unnest(cols = c("value")) |>
-          dplyr::filter(name == "units") |>
-          dplyr::pull(value) |>
-          stringr::str_remove("days since ") |>
-          stringr::str_remove(" 00:00:00") |>
-          stringr::str_remove(" 0:0:0") |>
-          lubridate::ymd()
-      }
-
+  # Overwrite parsed time if fgetdate provided
+  if (!is.na(fgetdate)){
+    # if fgetdate provided, use this function to derive time(s) from filename
     if (!is.na(timenam)){
-      if (!is.na(fgetdate)){
-        df <- df |>
-          dplyr::rename(lon = !!lonnam, lat = !!latnam) |>
-          dplyr::mutate(time = fgetdate(filnam))
+      df <- df |>
+        dplyr::mutate(!!timenam := fgetdate(filnam))
+    } else {
+      warning("Ignored argument 'fgetdate', since no argument 'timenam' provided.")
+    }
+  }
 
+  if (is.na(fgetdate)){ # IF NEEDED (i.e. only with old version of tidync)
+    if (!is.na(timenam)){# parse time if timenam provided
+
+      # with tidync v 0.3.0.9002 nothing needed: https://github.com/ropensci/tidync/issues/54
+      # with previous tidync:
+      if (packageVersion("tidync") >= "0.3.0.9002") {
+        # or equivalently: typeof(df[[timenam]]) == "character"
+        # nothing needed: https://github.com/ropensci/tidync/issues/54
       } else {
-        if (noleap){
-          # if calendar of netcdf time dimension is no-leap, then do...
-          # determine last year in file.
-          last_date <- basedate + lubridate::days(floor(df$time[length(df$time)])) - lubridate::days(1)
-          last_year <- lubridate::year(last_date)
+        # else, i.e. if (typeof(df[[timenam]]) == "numeric")
 
-          # "manually" remove additional day in leap years
-          df_noleap <- tibble::tibble(
-            time = seq(from = basedate, to = lubridate::ymd(paste0(last_year , "-12-31")), by = "days")
-          ) |>
-            dplyr::mutate(month = lubridate::month(time), mday = lubridate::mday(time)) |>
-            dplyr::filter(!(month == 2 & mday == 29)) |>
-            dplyr::mutate(days_since = as.integer(1:dplyr::n() - 1))
+        # otherwise use package CFtime to get time strings from metadata
+                      # get_time_strings <- function(filename, timenam="time"){
+                      #   cf_list <- lapply(
+                      #     filename,
+                      #     function(fn){CFtime::as_timestamp(get_CFtime(fn, timenam="time"))})
+                      #   return(sort(purrr::list_c(cf_list)))
+                      # }
+                      # get_CFtime <- function(filename, timenam="time"){
+                      #   nc <- ncdf4::nc_open(filename)
+                      #   cf <- CFtime::CFtime( # create a CFtime instance
+                      #     nc$dim[[timenam]]$units,
+                      #     nc$dim[[timenam]]$calendar,
+                      #     nc$dim[[timenam]]$vals)
+                      #   ncdf4::nc_close(nc)
+                      #   return(cf)
+                      # }
+                      # time_strings <- get_time_strings(filnam, timenam = timenam)
+        nc <- ncdf4::nc_open(filnam)
+        units    <- nc$dim[[timenam]]$units
+        calendar <- nc$dim[[timenam]]$calendar
+        ncdf4::nc_close(nc)
 
-
-          df <- df |>
-            dplyr::mutate(time = as.integer(time)) |>
-            dplyr::left_join(
-              df_noleap |>
-                dplyr::rename(date = time) |>
-                dplyr::rename(time = days_since),
-              by = "time"
-            ) |>
-            dplyr::select(-month, -mday, -time) |>
-            dplyr::rename(time = date)
-
-        } else {
-          df <- df |>
-            dplyr::rename(time = !!timedimnam, lon = !!lonnam, lat = !!latnam) |>
-            dplyr::mutate(time = basedate + lubridate::days(floor(time)) - lubridate::days(1))
-
-        }
+        df <- df |>
+          dplyr::mutate(
+            !!timenam :=
+              CFtime::as_timestamp(CFtime::CFtime(definition = units,
+                                                  calendar = calendar,
+                                                  offsets = time)))
       }
     }
-
   }
 
   return(df)
