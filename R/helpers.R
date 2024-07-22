@@ -168,19 +168,6 @@ nclist_to_df_byfil <- function(
   # CRAN HACK, use .data$ syntax for correct fix
   index <- lat <- lon <- name <- value <- NULL
 
-  if (is.na(basedate) && is.na(fgetdate) && !is.na(timenam)){
-    # get base date (to interpret time units in 'days since X')
-    basedate <- ncmeta::nc_atts(filnam, timenam) |>
-      dplyr::filter(name != "_FillValue") |>
-      tidyr::unnest(cols = c("value")) |>
-      dplyr::filter(name == "units") |>
-      dplyr::pull(value) |>
-      stringr::str_remove("days since ") |>
-      stringr::str_remove(" 00:00:00") |>
-      stringr::str_remove(" 0:0:0") |>
-      lubridate::ymd()
-  }
-
   # check if requested dimensions and variables exist
   ncdf <- tidync::tidync(filnam)
 
@@ -216,6 +203,18 @@ nclist_to_df_byfil <- function(
     tidync::hyper_tibble(tidyselect::vars_pull(varnam))
 
   if (nrow(df)>0){
+      if (is.na(basedate) && is.na(fgetdate) && !is.na(timenam)){
+        # get base date (to interpret time units in 'days since X')
+        basedate <- ncmeta::nc_atts(filnam, timenam) |>
+          dplyr::filter(name != "_FillValue") |>
+          tidyr::unnest(cols = c("value")) |>
+          dplyr::filter(name == "units") |>
+          dplyr::pull(value) |>
+          stringr::str_remove("days since ") |>
+          stringr::str_remove(" 00:00:00") |>
+          stringr::str_remove(" 0:0:0") |>
+          lubridate::ymd()
+      }
 
     if (!is.na(timenam)){
       if (!is.na(fgetdate)){
