@@ -12,7 +12,6 @@ nclist_to_df_byfil(
   lonnam,
   latnam,
   timenam,
-  timedimnam,
   fgetdate
 )
 }
@@ -34,9 +33,6 @@ files.}
 
 \item{timenam}{The name of dimension variable used for timein the NetCDF
 files. Defaults to \code{"time"}.}
-
-\item{timedimnam}{The name of the dimension (axis) used for time.
-Defaults to \code{"time"}.}
 
 \item{fgetdate}{A function to derive the date used for the time dimension
 based on the file name.}

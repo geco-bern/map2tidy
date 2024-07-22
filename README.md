@@ -22,8 +22,7 @@ df <- map2tidy(
   varnam = "et",
   lonnam = "lon", 
   latnam = "lat", 
-  timenam = "time", 
-  timedimnam = "time"
+  timenam = "time"
   )
 
 df
@@ -48,7 +47,6 @@ map2tidy(
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
-  timedimnam = "time",
   outdir = paste0(here::here(), "/data/"), 
   fileprefix = "demo_data_2017", 
   overwrite = TRUE
@@ -67,7 +65,6 @@ map2tidy(
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
-  timedimnam = "time",
   outdir = paste0(here::here(), "/data/"), 
   fileprefix = "demo_data_2017", 
   ncores = 3,

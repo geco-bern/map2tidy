@@ -13,8 +13,6 @@
 #' @param latnam The dimension name of latitude in the NetCDF files.
 #' @param timenam The name of dimension variable used for timein the NetCDF
 #' files. Defaults to \code{NA}.
-#' @param timedimnam The name of the dimension (axis) used for time.
-#' Defaults to \code{NA}.
 #' @param do_chunks A logical specifying whether chunks of data should be
 #' written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
 #' arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
@@ -54,7 +52,6 @@ map2tidy <- function(
   lonnam = "lon",
   latnam = "lat",
   timenam = NA,
-  timedimnam = NA,
   do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
@@ -112,7 +109,6 @@ map2tidy <- function(
         lonnam              = lonnam,
         latnam              = latnam,
         timenam             = timenam,
-        timedimnam          = timedimnam,
         fgetdate            = fgetdate,
         overwrite           = overwrite,
         nclist_to_df_byilon = nclist_to_df_byilon,
@@ -133,7 +129,6 @@ map2tidy <- function(
             lonnam,
             latnam,
             timenam,
-            timedimnam,
             fgetdate,
             overwrite
             )
@@ -154,7 +149,6 @@ map2tidy <- function(
         lonnam,
         latnam,
         timenam,
-        timedimnam,
         fgetdate,
         overwrite
         ))
@@ -171,7 +165,6 @@ map2tidy <- function(
         lonnam,
         latnam,
         timenam,
-        timedimnam,
         fgetdate))
 
     if (!is.na(outdir)){

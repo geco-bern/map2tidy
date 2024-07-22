@@ -42,8 +42,7 @@ df <- map2tidy(
   varnam = "et",
   lonnam = "lon", 
   latnam = "lat", 
-  timenam = "time", 
-  timedimnam = "time"
+  timenam = "time"
   )
 ```
 
@@ -72,7 +71,6 @@ map2tidy(
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
-  timedimnam = "time",
   outdir = tempdir(), 
   fileprefix = "demo_data_2017", 
   overwrite = TRUE
@@ -89,7 +87,6 @@ map2tidy(
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
-  timedimnam = "time",
   do_chunks = TRUE,
   outdir = tempdir(), 
   fileprefix = "demo_data_2017", 
@@ -115,7 +112,6 @@ df <- map2tidy(
   varnam = "et",
   lonnam = "lon", 
   latnam = "lat", 
-  timenam = "time", 
-  timedimnam = "time"
+  timenam = "time"
   )
 ```

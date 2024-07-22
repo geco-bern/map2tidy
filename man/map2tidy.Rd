@@ -10,7 +10,6 @@ map2tidy(
   lonnam = "lon",
   latnam = "lat",
   timenam = NA,
-  timedimnam = NA,
   do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
@@ -32,9 +31,6 @@ files.}
 
 \item{timenam}{The name of dimension variable used for timein the NetCDF
 files. Defaults to \code{NA}.}
-
-\item{timedimnam}{The name of the dimension (axis) used for time.
-Defaults to \code{NA}.}
 
 \item{do_chunks}{A logical specifying whether chunks of data should be
 written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the

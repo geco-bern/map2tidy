@@ -8,8 +8,6 @@
 #' @param latnam The dimension name of latitude in the NetCDF files.
 #' @param timenam The name of dimension variable used for timein the NetCDF
 #' files. Defaults to \code{NA}.
-#' @param timedimnam The name of the dimension (axis) used for time.
-#' Defaults to \code{NA}.
 #' @param outdir A character string specifying output directory where data
 #' frames are written using the \code{save} statement. If omitted (defaults to
 #' \code{NA}), a tidy data frame containing all data is returned.
@@ -36,7 +34,6 @@ nclist_to_df_byilon <- function(
     lonnam,
     latnam,
     timenam,
-    timedimnam,
     fgetdate,
     overwrite
 ){
@@ -63,7 +60,6 @@ nclist_to_df_byilon <- function(
                           lonnam = lonnam,
                           latnam = latnam,
                           timenam = timenam,
-                          timedimnam = timedimnam,
                           fgetdate
       )
     )
@@ -123,8 +119,6 @@ nclist_to_df_byilon <- function(
 #' @param latnam The dimension name of latitude in the NetCDF files.
 #' @param timenam The name of dimension variable used for timein the NetCDF
 #' files. Defaults to \code{"time"}.
-#' @param timedimnam The name of the dimension (axis) used for time.
-#' Defaults to \code{"time"}.
 #' @param fgetdate A function to derive the date used for the time dimension
 #' based on the file name.
 #'
@@ -138,7 +132,6 @@ nclist_to_df_byfil <- function(
     lonnam,
     latnam,
     timenam,
-    timedimnam,
     fgetdate
 ){
 

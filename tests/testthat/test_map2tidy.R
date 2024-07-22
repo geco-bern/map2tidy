@@ -14,8 +14,7 @@ test_that("test map2tidy", {
     varnam = "et",
     lonnam = "lon",
     latnam = "lat",
-    timenam = "time",
-    timedimnam = "time"
+    timenam = "time"
   )
 
   # check status

@@ -32,7 +32,6 @@ map2tidy(
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
-  timedimnam = "time",
   do_chunks = TRUE,
   outdir = tempdir(), 
   fileprefix = "demo_data_2017", 
