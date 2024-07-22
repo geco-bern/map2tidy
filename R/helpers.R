@@ -82,7 +82,7 @@ nclist_to_df_byilon <- function(
         dplyr::bind_rows() |>
         dplyr::group_by(lon, lat) |>
         tidyr::nest() |>
-        dplyr::mutate(data = purrr::map(data, ~dplyr::arrange(., time)))
+        dplyr::mutate(data = purrr::map(data, ~dplyr::arrange(., datetime)))
 
     }
 
@@ -179,12 +179,16 @@ nclist_to_df_byfil <- function(
   df <- ncdf |>
     tidync::hyper_tibble(tidyselect::vars_pull(varnam),
                          drop=FALSE) |>
-    # hardcode: lon and lat as longitude and latitude
-    dplyr::rename(lon = !!lonnam, lat = !!latnam) |>
+    # hardcode colnames: lon and lat as longitude and latitude, and datetime
+    # dplyr::rename(lon = !!lonnam, lat = !!latnam) |>
+    dplyr::rename(dplyr::any_of(c(
+      lon      = lonnam,
+      lat      = latnam,
+      datetime = timenam))) |> # columns might or might not exist
     # transform to numeric
     dplyr::mutate(lon = as.numeric(lon), lat = as.numeric(lat))
-  # NOTE: df based on tidync (< v.0.3.0.9002) contains integer time column
-  # NOTE: df based on tidync (>= v.0.3.0.9002) contains string time column
+  # NOTE: df based on tidync (< v.0.3.0.9002) contains integer datetime column
+  # NOTE: df based on tidync (>= v.0.3.0.9002) contains string datetime column
 
   # Overwrite parsed time if fgetdate provided
   if (!is.na(fgetdate)){
@@ -198,33 +202,18 @@ nclist_to_df_byfil <- function(
   }
 
   if (is.na(fgetdate)){ # IF NEEDED (i.e. only with old version of tidync)
-    if (!is.na(timenam)){# parse time if timenam provided
+    if (!is.na(timenam)){# parse integer datetime if timenam provided
 
       # with tidync v 0.3.0.9002 nothing needed: https://github.com/ropensci/tidync/issues/54
       # with previous tidync:
-      if (packageVersion("tidync") >= "0.3.0.9002") {
+      if (utils::packageVersion("tidync") >= "0.3.0.9002") {
         # or equivalently: typeof(df[[timenam]]) == "character"
         # nothing needed: https://github.com/ropensci/tidync/issues/54
       } else {
         # else, i.e. if (typeof(df[[timenam]]) == "numeric")
+        # parse integer datetime
 
-        # otherwise use package CFtime to get time strings from metadata
-                      # get_time_strings <- function(filename, timenam="time"){
-                      #   cf_list <- lapply(
-                      #     filename,
-                      #     function(fn){CFtime::as_timestamp(get_CFtime(fn, timenam="time"))})
-                      #   return(sort(purrr::list_c(cf_list)))
-                      # }
-                      # get_CFtime <- function(filename, timenam="time"){
-                      #   nc <- ncdf4::nc_open(filename)
-                      #   cf <- CFtime::CFtime( # create a CFtime instance
-                      #     nc$dim[[timenam]]$units,
-                      #     nc$dim[[timenam]]$calendar,
-                      #     nc$dim[[timenam]]$vals)
-                      #   ncdf4::nc_close(nc)
-                      #   return(cf)
-                      # }
-                      # time_strings <- get_time_strings(filnam, timenam = timenam)
+        # use package CFtime to get time strings from metadata and integers
         nc <- ncdf4::nc_open(filnam)
         units    <- nc$dim[[timenam]]$units
         calendar <- nc$dim[[timenam]]$calendar
@@ -235,7 +224,7 @@ nclist_to_df_byfil <- function(
             !!timenam :=
               CFtime::as_timestamp(CFtime::CFtime(definition = units,
                                                   calendar = calendar,
-                                                  offsets = time)))
+                                                  offsets = datetime)))
       }
     }
   }

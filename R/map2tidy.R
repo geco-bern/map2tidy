@@ -36,7 +36,7 @@
 #'
 #' @return Generates a tibble (containing columns 'lon' (double), 'lat' (double),
 #'         and nested column 'data'). Column 'data' contains requested variables
-#'         (probably as doubles) and potentially a datetime (as string). Note that
+#'         (probably as doubles) and potentially a column 'datetime' (as string). Note that
 #'         the datetime is defined by package CFtime and can contain dates such
 #'         as "2021-02-30", which are valid for 360-day calendars but not for
 #'         POSIXt. Because of that these dates need to be parsed separately.
