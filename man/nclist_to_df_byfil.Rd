@@ -8,14 +8,11 @@ band}
 nclist_to_df_byfil(
   filnam,
   ilon = NA,
-  basedate,
   varnam,
   lonnam,
   latnam,
   timenam,
   timedimnam,
-  noleap,
-  res_time,
   fgetdate
 )
 }
@@ -27,8 +24,6 @@ all processing and writing chunks to separate output files. If provided,
 it overrides that the function extracts data for all longitude indices. If
 omitted (\code{ilon = NA}), the function returns tidy data for all longitude
 indexes.}
-
-\item{basedate}{reference data for NetCDF time dimension}
 
 \item{varnam}{The variable name(s) for which data is to be read from NetCDF
 files.}
@@ -42,14 +37,6 @@ files. Defaults to \code{"time"}.}
 
 \item{timedimnam}{The name of the dimension (axis) used for time.
 Defaults to \code{"time"}.}
-
-\item{noleap}{A logical specifying whether the calendar of the NetCDF time
-axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
-Defaults to \code{NA} - no prior information specified and dynamically inter-
-preted from NetCDF file.}
-
-\item{res_time}{A character specifying the resolution of the time axis.
-Available: \code{c("mon", "day")}. Defaults to \code{"day"}.}
 
 \item{fgetdate}{A function to derive the date used for the time dimension
 based on the file name.}

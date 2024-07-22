@@ -91,7 +91,7 @@ map2tidy <- function(
   }
 
   # collect time series per longitude slice and create separate files per longitude slice.
-  # This step can be parallelized (dependecies: tidync, dplyr, tidyr, purrr, magrittr)
+  # This step can be parallelized (dependecies: tidync, dplyr, tidyr, purrr)
   message(paste0("Create tidy dataframes for following NetCDF map files:\n    ",
                  paste0(nclist, collapse = ",\n    "),
                  "\nand extract (for ", ifelse(length(ilon) == 1,
@@ -103,7 +103,7 @@ map2tidy <- function(
 
     # chunking by longitude and sending to cluster for parallelisation
     cl <- multidplyr::new_cluster(ncores) |>
-      multidplyr::cluster_library(c("dplyr", "purrr", "tidyr", "tidync", "dplyr", "magrittr")) |>
+      multidplyr::cluster_library(c("dplyr", "purrr", "tidyr", "tidync", "dplyr")) |>
       multidplyr::cluster_assign(
         nclist              = nclist,
         outdir              = outdir,

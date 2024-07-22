@@ -12,10 +12,6 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(map2tidy)
-library(dplyr)
-library(ggplot2)
-
 df <- readRDS(file.path(system.file(package = "map2tidy"),"extdata/tidy_map.rds"))
 ```
 
@@ -33,8 +29,6 @@ The function `map2tidy` takes a vector of file names (full paths) of NetCDF file
 
 ```{r eval = FALSE}
 library(map2tidy)
-library(dplyr)
-library(ggplot2)
 
 # list demo file path
 path <- file.path(system.file(package = "map2tidy"),"extdata")
@@ -59,9 +53,13 @@ head(df)
 
 The complete time series are now nested data frames in column `data`. We can plot them.
 ```{r}
-df$data[[1]] |> 
-  ggplot(aes(time, et)) +
-  geom_line()
+# library(ggplot2)
+# df |>
+#   dplyr::group_by(lon,lat) |> tidyr::nest() |> dplyr::arrange(lon, lat) |>
+#   dplyr::ungroup() |> dplyr::slice(1:6) |> tidyr::unnest(cols = data) |>
+#   dplyr::mutate(datetime = lubridate::ymd(datetime),
+#                 lon_lat = paste(round(lon,3),'/', round(lat,3))) |>
+#   ggplot(aes(datetime, et, color = lon_lat)) + geom_line()
 ```
 
 ### Large files
@@ -100,9 +98,9 @@ map2tidy(
   )
 ```
 
-## Monthly and annual files
+## Hourly, daily, monthly and annual files
 
-The time axis treatment is somewhat different if it's not in units of days in the NetCDF files. However, `map2tidy()` is robust against that. However, compatibility with a monthly resolution and a non-standard calendar (e.g., no leap years) is not tested.
+The time axis treatment relies on on the package (`CFtime`)[https://github.com/pvanlaake/CFtime] that should be compatible with many different calendars, including non-standard calendars (no leap years, or 360-day years). Because non-standard calendar are not POSIXt-compatible (e.g. the date "2021-02-30"), `map2tidy()` does not return `datetimes` but simply `strings` describing the dates. The user is required to parse the dates themselves. Note that non-standard calendar (e.g., no leap years) are not tested.
 
 ```{r eval = FALSE}
 # list demo file path

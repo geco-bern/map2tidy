@@ -11,13 +11,10 @@ map2tidy(
   latnam = "lat",
   timenam = NA,
   timedimnam = NA,
-  noleap = FALSE,
-  res_time = "day",
   do_chunks = FALSE,
   outdir = NA,
   fileprefix = NA,
   ncores = 1,
-  single_basedate = FALSE,
   fgetdate = NA,
   overwrite = FALSE
 )
@@ -39,14 +36,6 @@ files. Defaults to \code{NA}.}
 \item{timedimnam}{The name of the dimension (axis) used for time.
 Defaults to \code{NA}.}
 
-\item{noleap}{A logical specifying whether the calendar of the NetCDF time
-axis contains leap years. If it doesn't, \code{noleap} is \code{TRUE}.
-Defaults to \code{NA} - no prior information specified and dynamically inter-
-preted from NetCDF file.}
-
-\item{res_time}{A character specifying the resolution of the time axis.
-Available: \code{c("mon", "day")}. Defaults to \code{"day"}.}
-
 \item{do_chunks}{A logical specifying whether chunks of data should be
 written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
 arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
@@ -64,10 +53,6 @@ extraction of longitude slices). When set to \code{"all"}, the number of
 cores for parallelisation is determined by \code{parallel::detectCores()}.
 Defaults to \code{1} (no parallelisation).}
 
-\item{single_basedate}{A logical specifying whether all files in the file
-list have the same
-base date (e.g., time units given in 'days since \if{html}{\out{<basedate>}}').}
-
 \item{fgetdate}{A function to derive the date used for the time dimension
 based on the file name.}
 
@@ -75,7 +60,17 @@ based on the file name.}
 overwritten.}
 }
 \value{
-Nothing. Writes data to .rds files for each longitude index.
+Generates a tibble (containing columns 'lon' (double), 'lat' (double),
+and nested column 'data'). Column 'data' contains requested variables
+(probably as doubles) and potentially a datetime (as string). Note that
+the datetime is defined by package CFtime and can contain dates such
+as "2021-02-30", which are valid for 360-day calendars but not for
+POSIXt. Because of that these dates need to be parsed separately.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    The function either returns this tibble or
+    then (if out_dir is specified) returns nothing and writes the tibble
+    to .rds files for each longitude value.
+}\if{html}{\out{</div>}}
 }
 \description{
 Extracts full time series from a list of NetCDF files, provided for time
