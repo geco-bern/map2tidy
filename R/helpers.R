@@ -49,7 +49,7 @@ nclist_to_df_byilon <- function(
     outpath <- dirname(nclist[1])
   }
 
-  if (!file.exists(outpath) || overwrite || is.na(outdir)){
+  if (is.na(outdir) || !file.exists(outpath) || overwrite){
 
     # get data from all files at given longitude index ilon
     df <- purrr::map(
@@ -173,7 +173,7 @@ ncfile_to_df <- function(
     # subset data to longitudinal band `ilon`
     # deal with dynamic longitude dimension name
     if (lonnam == "lon"){
-      ncdf <- tidync::hyper_filter(ncdf, lon = dplyr::near(index, ilon))
+      ncdf <- tidync::hyper_filter(ncdf, lon       = dplyr::near(index, ilon))
     } else if (lonnam == "longitude"){
       ncdf <- tidync::hyper_filter(ncdf, longitude = dplyr::near(index, ilon))
     } else {

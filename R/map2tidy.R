@@ -61,40 +61,66 @@ map2tidy <- function(
   ){
 
   # check plausibility of argument combination
-  if (ncores > 1 && !do_chunks){
+  if ((ncores > 1 || ncores=="all") && !do_chunks){
     warning("Warning: using multiple cores (ncores > 1) only takes effect when
             do_chunks is TRUE.")
   }
 
   # Determine longitude indices for chunks
-  if (do_chunks){
+  # open one file to get longitude information: length of longitude dimension
+  meta_dims <- tidync::hyper_dims(tidync::tidync(nclist[1]))
+  nlon <- meta_dims |>
+    dplyr::filter(name == lonnam) |>
+    dplyr::pull(length)
+  # tidync::tidync(nclist[1])
 
+  if (do_chunks){
     # check if necessary arguments are provided
     if (identical(NA, outdir) || identical(NA, fileprefix)){
       stop("Error: arguments outdir and fileprefix must be specified when do_chunks is TRUE.")
     }
-
-    # open one file to get longitude information: length of longitude dimension
-    nlon <- tidync::hyper_dims(tidync::tidync(nclist[1])) |>
-      dplyr::filter(name == lonnam) |>
-      dplyr::pull(length)
+    ilon <- seq(nlon)
   } else {
-    nlon <- 1
+    ilon <- 1:1
   }
-  ilon <- seq(nlon)
 
   if (ncores=="all"){
     ncores <- parallel::detectCores()
   }
+  # Message out
+  message(paste0(
+    "Create tidy dataframes for following NetCDF map files:\n    ",
+    paste0(nclist, collapse = ",\n    "),
+    "\nand extract variable(s): ", paste0(varnam, collapse = ","),
+    "; (in ",
+    ifelse(length(ilon) == 1,
+           "1 spatial chunk",
+           sprintf("spatial chunks %d to %d", min(ilon), max(ilon))),
+    ifelse(ncores>1,
+           sprintf(", distributed over %d workers", ncores),
+           ""),
+    ")."))
+
+  # if (ncores > 1 && length(ilon) > 1){
+  # } else if (do_chunks) {
+  #   message("Writing output file to", paste0(outdir, "/", fileprefix, ".rds"), "...")
+  #   if (!is.na(outdir)){
+  #     # check whether output has been created already (otherwise do nothing)
+  #     if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
+  #     outpath <- paste0(outdir, "/", fileprefix, "_ilon_", ilon, ".rds")
+  #   } else {
+  #     outpath <- dirname(nclist[1])
+  #   }
+  #   message(paste("Writing output file(s) to ", outpath, "..."))
+  # } else {
+  #   if (!is.na(outdir)){
+  #     message("Writing output file to ", paste0(outdir, "/", fileprefix, ".rds"), "...")
+  #   }
+  # }
+
 
   # collect time series per longitude slice and create separate files per longitude slice.
   # This step can be parallelized (dependecies: tidync, dplyr, tidyr, purrr)
-  message(paste0("Create tidy dataframes for following NetCDF map files:\n    ",
-                 paste0(nclist, collapse = ",\n    "),
-                 "\nand extract (for ", ifelse(length(ilon) == 1,
-                                              "1 spatial chunk",
-                                              sprintf("spatial chunks %d to %d", min(ilon), max(ilon))),
-                 ") variable(s): ", paste0(varnam, collapse = ","), "."))
 
   if (ncores > 1 && length(ilon) > 1){
 
