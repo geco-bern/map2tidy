@@ -45,8 +45,7 @@ nclist_to_df_byilon <- function(
     # check whether output has been created already (otherwise do nothing)
     if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
     outpath <- paste0(outdir, "/", fileprefix, "_ilon_", ilon, ".rds")
-  } else {
-    outpath <- dirname(nclist[1])
+    # TODO: if ilon == NA: outpath <- paste0(outdir, "/", fileprefix, ".rds")
   }
 
   if (is.na(outdir) || !file.exists(outpath) || overwrite){
