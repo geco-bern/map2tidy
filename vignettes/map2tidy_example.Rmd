@@ -53,13 +53,12 @@ head(df)
 
 The complete time series are now nested data frames in column `data`. We can plot them.
 ```{r}
-# library(ggplot2)
-# df |>
-#   dplyr::group_by(lon,lat) |> tidyr::nest() |> dplyr::arrange(lon, lat) |>
-#   dplyr::ungroup() |> dplyr::slice(1:6) |> tidyr::unnest(cols = data) |>
-#   dplyr::mutate(datetime = lubridate::ymd(datetime),
-#                 lon_lat = paste(round(lon,3),'/', round(lat,3))) |>
-#   ggplot(aes(datetime, et, color = lon_lat)) + geom_line()
+library(ggplot2)
+df |>
+  dplyr::ungroup() |> dplyr::slice(1:6) |> tidyr::unnest(cols = data) |>
+  dplyr::mutate(datetime = lubridate::ymd(datetime),
+                lon_lat = paste(round(lon,3),'/', round(lat,3))) |>
+  ggplot(aes(datetime, et, color = lon_lat)) + geom_line()
 ```
 
 ### Large files
