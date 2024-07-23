@@ -143,11 +143,12 @@ map2tidy <- function(
         ncfile_to_df        = ncfile_to_df)
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
-    out <- dplyr::tibble(ilon = ilon) |>
+    ilon_list <- ilon
+    out <- dplyr::tibble(ilon = ilon_list) |>
       multidplyr::partition(cl) |>
       dplyr::mutate(
-        out = purrr::map_int(
-          ilon,
+        out = purrr::map(
+          as.list(ilon),
           ~map2tidy::nclist_to_df_byilon(
             nclist,
             .,
@@ -159,58 +160,50 @@ map2tidy <- function(
             timenam,
             fgetdate,
             overwrite
-            )
-          )
+            ))
         )
-
-  } else if (do_chunks) {
-
-    # chunking by longitude
-    out <- purrr::map(
-      as.list(ilon),
-      ~map2tidy::nclist_to_df_byilon(
-        nclist,
-        .,
-        outdir,
-        fileprefix,
-        varnam,
-        lonnam,
-        latnam,
-        timenam,
-        fgetdate,
-        overwrite
-        ))
-
-  } else {
-
-    # no chunking. read entire files.
-    out <- purrr::map(
-      as.list(nclist),
-      ~map2tidy::nclist_to_df_byfil(
-        .,
-        ilon = NA,
-        varnam,
-        lonnam,
-        latnam,
-        timenam,
-        fgetdate))
-
-    if (!is.na(outdir)){
-      if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
-      outpath <- paste0(outdir, fileprefix, ".rds")
-      if (!file.exists(outpath) || overwrite){
-        message(paste("Writing file", outpath, "..."))
-        readr::write_rds(out, file = outpath)
-        rm("out")
-      } else {
-        message(paste("File exists already:", outpath))
-      }
-    }
+  } else if (do_chunks) { # chunking by longitude on a single core
+    ilon_list <- ilon
+    out <- dplyr::tibble(ilon = ilon_list) |>
+      # multidplyr::partition(cl) |>
+      dplyr::mutate(
+        out = purrr::map(
+          as.list(ilon),
+          ~map2tidy::nclist_to_df_byilon(
+            nclist,
+            .,
+            outdir,
+            fileprefix,
+            varnam,
+            lonnam,
+            latnam,
+            timenam,
+            fgetdate,
+            overwrite
+          ))
+      )
+  } else { # no chunking. read entire files.
+    ilon_list <- NA
+    out <- dplyr::tibble(ilon = ilon_list) |>
+      # multidplyr::partition(cl) |>
+      dplyr::mutate(
+        out = purrr::map(
+          as.list(ilon),
+          ~map2tidy::nclist_to_df_byilon(
+            nclist,
+            .,
+            outdir,
+            fileprefix,
+            varnam,
+            lonnam,
+            latnam,
+            timenam,
+            fgetdate,
+            overwrite
+          ))
+      )
   }
 
-  if (is.na(outdir)){
-    return(dplyr::bind_rows(out))
-  } else {
-    return(NULL)
-  }
+  return(dplyr::collect(out) |> tidyr::unnest(out) |> dplyr::arrange(lon) |>
+           dplyr::select(!ilon))
 }

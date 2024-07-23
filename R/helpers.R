@@ -68,38 +68,37 @@ nclist_to_df_byilon <- function(
     drop_zerorows <- function(y) { return(y[!sapply(y,
                                                     function(x) nrow(x)==0 )]) }
     df <- df |>
-      drop_zerorows()
+      drop_zerorows() |>
+      dplyr::bind_rows()
 
     # nest only if there is a time dimension
-    if (identical(timenam, NA)){
-
+    if ("datetime" %in% names(tidyr::unnest(df, data))){
       df <- df |>
-        dplyr::bind_rows()
-
-    } else if (length(df) > 0){
-
-      df <- df |>
-        dplyr::bind_rows() |>
-        dplyr::group_by(lon, lat) |>
-        tidyr::nest() |>
+        tidyr::unnest(data) |>        # unnest the rows from individual NetCDF files
+        tidyr::nest(!c(lon, lat)) |>  # nest the rows for same coords across NetCDF files
+        dplyr::arrange(lon, lat) |>
         dplyr::mutate(data = purrr::map(data, ~dplyr::arrange(., datetime)))
-
+    } else {
+      df <- df |>
+        tidyr::unnest(data) |>        # unnest the rows from individual NetCDF files
+        dplyr::arrange(lon, lat)
     }
 
     if (!is.na(outdir)){
       message(paste("Writing file", outpath, "..."))
       readr::write_rds(df, file = outpath)
-      rm("df")
+      # rm("df")
+      return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
+        data = paste0("Written data by worker with jobid: ", Sys.getpid(), " into file: ", outpath)))
+    } else {
+      return(df)
     }
 
   } else {
-    message(paste("File exists already:", outpath))
-  }
-
-  if (is.na(outdir)){
-    return(dplyr::bind_rows(df))
-  } else {
-    return(ilon)
+    message(paste0("File exists already: ", outpath))
+    # return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
+    #   data = paste0("File exists already: ", outpath)))  # NOTE: can't output lon value if we don't read the NCfile
+    return(data.frame(lon=NA, data=paste0("File exists already: ", outpath)))
   }
 }
 
@@ -235,5 +234,5 @@ ncfile_to_df <- function(
     }
   }
 
-  return(df)
+  return(df |> tidyr::nest(!c(lon, lat)))
 }
