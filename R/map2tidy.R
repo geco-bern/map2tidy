@@ -85,8 +85,10 @@ map2tidy <- function(
   }
 
   if (ncores=="all"){
-    ncores <- parallel::detectCores()
+    ncores <- parallel::detectCores() - 1
   }
+  ncores <- min(ncores, length(ilon))
+
   # Message out
   message(paste0(
     "Create tidy dataframes for following NetCDF map files:\n    ",
@@ -122,7 +124,7 @@ map2tidy <- function(
   # collect time series per longitude slice and create separate files per longitude slice.
   # This step can be parallelized (dependecies: tidync, dplyr, tidyr, purrr)
 
-  if (ncores > 1 && length(ilon) > 1){
+  if (ncores > 1){ # chunking by longitude over multiple cores
 
     # chunking by longitude and sending to cluster for parallelisation
     cl <- multidplyr::new_cluster(ncores) |>
