@@ -226,7 +226,7 @@ ncfile_to_df <- function(
 
         df <- df |>
           dplyr::mutate(
-            !!timenam :=
+            datetime =
               CFtime::as_timestamp(CFtime::CFtime(definition = units,
                                                   calendar = calendar,
                                                   offsets = datetime)))
