@@ -9,7 +9,7 @@ nclist_to_df_byilon(
   ilon,
   outdir,
   fileprefix,
-  varnam,
+  varnames,
   lonnam,
   latnam,
   timenam,
@@ -24,8 +24,8 @@ files.}
 \item{ilon}{An integer specifying an individual longitude index for chunking
 all processing and writing chunks to separate output files. If provided,
 it overrides that the function extracts data for all longitude indices. If
-omitted (\code{ilon = NA}), the function returns tidy data for all longitude
-indexes.}
+omitted (\code{ilon = NA}), the function outputs/returns tidy data for all
+longitude indexes.}
 
 \item{outdir}{A character string specifying output directory where data
 frames are written using the \code{save} statement. If omitted (defaults to
@@ -33,7 +33,7 @@ frames are written using the \code{save} statement. If omitted (defaults to
 
 \item{fileprefix}{A character string specifying the file name prefix.}
 
-\item{varnam}{The variable name(s) for which data is to be read from NetCDF
+\item{varnames}{The variable name(s) for which data is to be read from NetCDF
 files.}
 
 \item{lonnam}{The dimension name of longitude in the NetCDF files.}
