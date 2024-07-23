@@ -44,6 +44,7 @@ df <- map2tidy(
   latnam = "lat", 
   timenam = "time"
   )
+# saveRDS(df, file = "../inst/extdata/tidy_map.rds")
 ```
 
 ```{r}
