@@ -7,8 +7,8 @@
 #'
 #' @param nclist A vector of character strings specifying the complete paths to
 #' files.
-#' @param varnam The variable name(s) for which data is to be read from NetCDF
-#' files.
+#' @param varnames The variable name(s) for which data is to be read from the
+#' NetCDF files.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #' @param latnam The dimension name of latitude in the NetCDF files.
 #' @param timenam The name of dimension variable used for time in the NetCDF
@@ -134,7 +134,7 @@ map2tidy <- function(
         nclist              = nclist,
         outdir              = outdir,
         fileprefix          = fileprefix,
-        varnam              = varnam,
+        varnames            = varnames,
         lonnam              = lonnam,
         latnam              = latnam,
         timenam             = timenam,

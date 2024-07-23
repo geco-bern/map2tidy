@@ -11,7 +11,7 @@ test_that("test map2tidy", {
   # load and convert
   df <- map2tidy(
     nclist = files,
-    varnam = "et",
+    varnames = "et",
     lonnam = "lon",
     latnam = "lat",
     timenam = "time"

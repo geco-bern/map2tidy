@@ -39,7 +39,7 @@ files <- list.files(path, pattern = "demo_data_2017_month", full.names = TRUE)
 # load and convert
 df <- map2tidy(
   nclist = files, 
-  varnam = "et",
+  varnames = "et",
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time"
@@ -67,7 +67,7 @@ When handling large files, having the complete data frame returned should be avo
 ```{r eval = FALSE}
 map2tidy(
   nclist = files, 
-  varnam = "et",
+  varnames = "et",
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
@@ -83,7 +83,7 @@ This process can be parallelised by setting the argument `ncores = 3` (or to ano
 ```{r eval = FALSE}
 map2tidy(
   nclist = files, 
-  varnam = "et",
+  varnames = "et",
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
@@ -109,7 +109,7 @@ file <- list.files(path, pattern = "demo_data_2017_MEAN", full.names = TRUE)
 # load and convert
 df <- map2tidy(
   nclist = file, 
-  varnam = "et",
+  varnames = "et",
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time"

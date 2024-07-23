@@ -28,7 +28,7 @@ This is demonstrated and explained in the vignette *map2tidy functionality*. The
 ```{r eval = FALSE}
 map2tidy(
   nclist = files, 
-  varnam = "et",
+  varnames = "et",
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
