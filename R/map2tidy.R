@@ -69,42 +69,44 @@ map2tidy <- function(
 
   # Determine longitude indices for chunks
   # open one file to get longitude information: length of longitude dimension
+  # tidync::tidync(nclist[1])
   meta_dims <- tidync::hyper_dims(tidync::tidync(nclist[1]))
   nlon <- meta_dims |>
     dplyr::filter(name == lonnam) |>
     dplyr::pull(length)
-  # tidync::tidync(nclist[1])
-
   if (do_chunks){
     # check if necessary arguments are provided
     if (identical(NA, outdir) || identical(NA, fileprefix)){
       stop("Error: arguments outdir and fileprefix must be specified when do_chunks is TRUE.")
     }
-    ilon <- seq(nlon)
-  } else {
-    ilon <- 1:1
   }
+  ilon_arg <- if (do_chunks){
+    seq(nlon) # chunking by longitude over multiple cores or single cors
+  } else {
+    NA        # no chunking. read entire files.
+  }
+
 
   if (ncores=="all"){
     ncores <- parallel::detectCores() - 1
   }
-  ncores <- min(ncores, length(ilon))
+  ncores <- min(ncores, length(ilon_arg))
 
   # Message out
   message(paste0(
     "Create tidy dataframes for following NetCDF map files:\n    ",
     paste0(nclist, collapse = ",\n    "),
-    "\nand extract variable(s): ", paste0(varnam, collapse = ","),
+    "\nand extract variable(s): ", paste0(varnames, collapse = ","),
     "; (in ",
-    ifelse(length(ilon) == 1,
+    ifelse(is.na(ilon_arg),
            "1 spatial chunk",
-           sprintf("spatial chunks %d to %d", min(ilon), max(ilon))),
+           sprintf("spatial chunks %d to %d", min(ilon_arg), max(ilon_arg))),
     ifelse(ncores>1,
            sprintf(", distributed over %d workers", ncores),
            ""),
     ")."))
 
-  # if (ncores > 1 && length(ilon) > 1){
+  # if (ncores > 1 && length(ilon_arg) > 1){
   # } else if (do_chunks) {
   #   message("Writing output file to", paste0(outdir, "/", fileprefix, ".rds"), "...")
   #   if (!is.na(outdir)){
@@ -123,13 +125,12 @@ map2tidy <- function(
 
 
   # collect time series per longitude slice and create separate files per longitude slice.
-  # This step can be parallelized (dependecies: tidync, dplyr, tidyr, purrr)
 
+  # Setup cluster if requested, otherwise use no-effect-placeholder-function
   if (ncores > 1){ # chunking by longitude over multiple cores
-
     # chunking by longitude and sending to cluster for parallelisation
     cl <- multidplyr::new_cluster(ncores) |>
-      multidplyr::cluster_library(c("dplyr", "purrr", "tidyr", "tidync", "dplyr")) |>
+      multidplyr::cluster_library(c("dplyr", "purrr", "tidyr", "tidync")) |>
       multidplyr::cluster_assign(
         nclist              = nclist,
         outdir              = outdir,
@@ -144,67 +145,31 @@ map2tidy <- function(
         ncfile_to_df        = ncfile_to_df)
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
-    ilon_list <- ilon
-    out <- dplyr::tibble(ilon = ilon_list) |>
-      multidplyr::partition(cl) |>
-      dplyr::mutate(
-        out = purrr::map(
-          as.list(ilon),
-          ~map2tidy::nclist_to_df_byilon(
-            nclist,
-            .,
-            outdir,
-            fileprefix,
-            varnam,
-            lonnam,
-            latnam,
-            timenam,
-            fgetdate,
-            overwrite
-            ))
-        )
-  } else if (do_chunks) { # chunking by longitude on a single core
-    ilon_list <- ilon
-    out <- dplyr::tibble(ilon = ilon_list) |>
-      # multidplyr::partition(cl) |>
-      dplyr::mutate(
-        out = purrr::map(
-          as.list(ilon),
-          ~map2tidy::nclist_to_df_byilon(
-            nclist,
-            .,
-            outdir,
-            fileprefix,
-            varnam,
-            lonnam,
-            latnam,
-            timenam,
-            fgetdate,
-            overwrite
-          ))
-      )
-  } else { # no chunking. read entire files.
-    ilon_list <- NA
-    out <- dplyr::tibble(ilon = ilon_list) |>
-      # multidplyr::partition(cl) |>
-      dplyr::mutate(
-        out = purrr::map(
-          as.list(ilon),
-          ~map2tidy::nclist_to_df_byilon(
-            nclist,
-            .,
-            outdir,
-            fileprefix,
-            varnam,
-            lonnam,
-            latnam,
-            timenam,
-            fgetdate,
-            overwrite
-          ))
-      )
+    parition_if_requested <- function(x, cl) {multidplyr::partition(x, cl)}
+  } else {
+    parition_if_requested <- function(x, cl) {x} # no-effect-placeholder-function
   }
 
+  # Loop over ilon_arg (and within nclist_to_df_byilon loop over nclist)
+  out <- dplyr::tibble(lon_index = ilon_arg) |>
+    parition_if_requested(cl) |>
+    dplyr::mutate(
+      out = purrr::map(
+        as.list(lon_index),
+        ~map2tidy::nclist_to_df_byilon(
+          nclist,
+          .,
+          outdir,
+          fileprefix,
+          varnames,
+          lonnam,
+          latnam,
+          timenam,
+          fgetdate,
+          overwrite
+        ))
+    )
+
   return(dplyr::collect(out) |> tidyr::unnest(out) |> dplyr::arrange(lon) |>
-           dplyr::select(!ilon))
+           dplyr::select(!lon_index))
 }
