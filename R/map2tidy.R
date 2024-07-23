@@ -106,24 +106,6 @@ map2tidy <- function(
            ""),
     ")."))
 
-  # if (ncores > 1 && length(ilon_arg) > 1){
-  # } else if (do_chunks) {
-  #   message("Writing output file to", paste0(outdir, "/", fileprefix, ".rds"), "...")
-  #   if (!is.na(outdir)){
-  #     # check whether output has been created already (otherwise do nothing)
-  #     if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
-  #     outpath <- paste0(outdir, "/", fileprefix, "_ilon_", ilon, ".rds")
-  #   } else {
-  #     outpath <- dirname(nclist[1])
-  #   }
-  #   message(paste("Writing output file(s) to ", outpath, "..."))
-  # } else {
-  #   if (!is.na(outdir)){
-  #     message("Writing output file to ", paste0(outdir, "/", fileprefix, ".rds"), "...")
-  #   }
-  # }
-
-
   # collect time series per longitude slice and create separate files per longitude slice.
 
   # Setup cluster if requested, otherwise use no-effect-placeholder-function
@@ -172,4 +154,5 @@ map2tidy <- function(
 
   return(dplyr::collect(out) |> tidyr::unnest(out) |> dplyr::arrange(lon) |>
            dplyr::select(!lon_index))
+  # return(dplyr::collect(out) |> tidyr::unnest(out))
 }
