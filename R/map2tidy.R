@@ -11,7 +11,7 @@
 #' files.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #' @param latnam The dimension name of latitude in the NetCDF files.
-#' @param timenam The name of dimension variable used for timein the NetCDF
+#' @param timenam The name of dimension variable used for time in the NetCDF
 #' files. Defaults to \code{NA}.
 #' @param do_chunks A logical specifying whether chunks of data should be
 #' written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
@@ -46,18 +46,19 @@
 #'         to .rds files for each longitude value.
 #' @export
 #'
+
 map2tidy <- function(
   nclist,
-  varnam,
-  lonnam = "lon",
-  latnam = "lat",
-  timenam = NA,
-  do_chunks = FALSE,
-  outdir = NA,
+  varnames,
+  lonnam     = "lon",
+  latnam     = "lat",
+  timenam    = NA,
+  do_chunks  = FALSE,
+  outdir     = NA,
   fileprefix = NA,
-  ncores = 1,
-  fgetdate = NA,
-  overwrite = FALSE
+  ncores     = 1,
+  fgetdate   = NA,
+  overwrite  = FALSE
   ){
 
   # check plausibility of argument combination

@@ -1,28 +1,38 @@
-#' Returns a tidy data frame from a NetCDF file for a longitudinal band
+#' Returns a tidy data.frame from a list of NetCDF file(s),
+#' optionally subsetting a single a longitudinal band
 #'
 #' @param nclist A vector of character strings specifying the complete paths to
 #' files.
-#' @param varnames The variable name(s) for which data is to be read from NetCDF
-#' files.
+#' @param varnames The variable name(s) for which data is to be read from the
+#' NetCDF files.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #' @param latnam The dimension name of latitude in the NetCDF files.
-#' @param timenam The name of dimension variable used for timein the NetCDF
-#' files. Defaults to \code{NA}.
+#' @param timenam The name of dimension variable used for time in the NetCDF
+#' files.
 #' @param outdir A character string specifying output directory where data
 #' frames are written using the \code{save} statement. If omitted (defaults to
 #' \code{NA}), a tidy data frame containing all data is returned.
 #' @param fileprefix A character string specifying the file name prefix.
-#' @param ilon An integer specifying an individual longitude index for chunking
-#' all processing and writing chunks to separate output files. If provided,
-#' it overrides that the function extracts data for all longitude indices. If
-#' omitted (\code{ilon = NA}), the function outputs/returns tidy data for all
-#' longitude indexes.
-#' @param fgetdate A function to derive the date used for the time dimension
+#' @param ilon An integer specifying an individual longitude index to subset.
+#' If provided, only longitude index 'ilon' is extracted. If omitted
+#' (\code{ilon = NA}), the function returns tidy data for all longitude
+#' indexes.
+#' @param fgetdate A function to derive the date(s) used for the time dimension
 #' based on the file name.
 #' @param overwrite A logical indicating whether time series files are to be
 #' overwritten.
 #'
-#' @return not sure
+#' @return Tidy tibble containing the variables 'varnames'.
+#'         Tibble contains columns 'lon' (double), 'lat' (double), and a nested
+#'         column 'data'.
+#'         Column 'data' contains requested variables (probably
+#'         as doubles) and might contain a column 'datetime' (as string).
+#'         Note that the datetime is defined by package CFtime and can contain
+#'         dates such as "2021-02-30 12:00:00", which are valid for 360-day
+#'         calendars but not for POSIXt. Because of that these dates need to be
+#'         parsed separately.
+#'         If \code{!is.na(outdir)}, then RDS files are generated in
+#'         \code{outdir} and column 'data' contains an output message.
 #' @export
 
 nclist_to_df_byilon <- function(
@@ -109,8 +119,8 @@ nclist_to_df_byilon <- function(
 #' @param filnam file name
 #' @param ilon An integer specifying an individual longitude index to subset.
 #' If provided, ilon overrides that the function extracts data for all longitude indices. If
-#' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
-#' indexes.
+#' omitted (the default: \code{ilon = NA}), the function returns tidy data for
+#' all longitude indices.
 #' @param varnames The variable name(s) for which data is to be read from the
 #' NetCDF file.
 #' @param lonnam The dimension name of longitude in the NetCDF file.
@@ -121,7 +131,8 @@ nclist_to_df_byilon <- function(
 #'
 #' @return Tidy tibble containing the variables 'varnames'.
 #'         Tibble contains columns 'lon' (double), 'lat' (double), and a nested
-#'         column 'data'. Column 'data' contains requested variables (probably
+#'         column 'data'.
+#'         Column 'data' contains requested variables (probably
 #'         as doubles) and might contain a column 'datetime' (as string).
 #'         Note that the datetime is defined by package CFtime and can contain
 #'         dates such as "2021-02-30 12:00:00", which are valid for 360-day
@@ -138,7 +149,6 @@ ncfile_to_df <- function(
     timenam,
     fgetdate
 ){
-
   # CRAN HACK, use .data$ syntax for correct fix
   index <- lat <- lon <- name <- value <- NULL
 
