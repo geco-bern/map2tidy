@@ -112,7 +112,7 @@ map2tidy <- function(
         fgetdate            = fgetdate,
         overwrite           = overwrite,
         nclist_to_df_byilon = nclist_to_df_byilon,
-        nclist_to_df_byfil  = nclist_to_df_byfil)
+        ncfile_to_df        = ncfile_to_df)
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
     out <- dplyr::tibble(ilon = ilon) |>

@@ -2,7 +2,7 @@
 #'
 #' @param nclist A vector of character strings specifying the complete paths to
 #' files.
-#' @param varnam The variable name(s) for which data is to be read from NetCDF
+#' @param varnames The variable name(s) for which data is to be read from NetCDF
 #' files.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #' @param latnam The dimension name of latitude in the NetCDF files.
@@ -15,8 +15,8 @@
 #' @param ilon An integer specifying an individual longitude index for chunking
 #' all processing and writing chunks to separate output files. If provided,
 #' it overrides that the function extracts data for all longitude indices. If
-#' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
-#' indexes.
+#' omitted (\code{ilon = NA}), the function outputs/returns tidy data for all
+#' longitude indexes.
 #' @param fgetdate A function to derive the date used for the time dimension
 #' based on the file name.
 #' @param overwrite A logical indicating whether time series files are to be
@@ -30,7 +30,7 @@ nclist_to_df_byilon <- function(
     ilon,
     outdir,
     fileprefix,
-    varnam,
+    varnames,
     lonnam,
     latnam,
     timenam,
@@ -54,13 +54,13 @@ nclist_to_df_byilon <- function(
     # get data from all files at given longitude index ilon
     df <- purrr::map(
       as.list(nclist),
-      ~nclist_to_df_byfil(.,
-                          ilon,
-                          varnam = varnam,
-                          lonnam = lonnam,
-                          latnam = latnam,
-                          timenam = timenam,
-                          fgetdate
+      ~ncfile_to_df(.,
+                    ilon,
+                    varnames = varnames,
+                    lonnam = lonnam,
+                    latnam = latnam,
+                    timenam = timenam,
+                    fgetdate
       )
     )
 
@@ -104,31 +104,36 @@ nclist_to_df_byilon <- function(
 }
 
 
-#' Returns a tidy data frame from a NetCDF file, optionally for a longitudinal
-#' band
+#' Returns a tidy data.frame from a single NetCDF file,
+#' optionally subsetting a single longitudinal band
 #'
 #' @param filnam file name
-#' @param ilon An integer specifying an individual longitude index for chunking
-#' all processing and writing chunks to separate output files. If provided,
-#' it overrides that the function extracts data for all longitude indices. If
+#' @param ilon An integer specifying an individual longitude index to subset.
+#' If provided, ilon overrides that the function extracts data for all longitude indices. If
 #' omitted (\code{ilon = NA}), the function returns tidy data for all longitude
 #' indexes.
-#' @param varnam The variable name(s) for which data is to be read from NetCDF
-#' files.
-#' @param lonnam The dimension name of longitude in the NetCDF files.
-#' @param latnam The dimension name of latitude in the NetCDF files.
-#' @param timenam The name of dimension variable used for timein the NetCDF
-#' files. Defaults to \code{"time"}.
-#' @param fgetdate A function to derive the date used for the time dimension
+#' @param varnames The variable name(s) for which data is to be read from the
+#' NetCDF file.
+#' @param lonnam The dimension name of longitude in the NetCDF file.
+#' @param latnam The dimension name of latitude in the NetCDF file.
+#' @param timenam The name of dimension variable used for time in the NetCDF file.
+#' @param fgetdate A function to derive the date(s) used for the time dimension
 #' based on the file name.
 #'
-#' @return not sure
+#' @return Tidy tibble containing the variables 'varnames'.
+#'         Tibble contains columns 'lon' (double), 'lat' (double), and a nested
+#'         column 'data'. Column 'data' contains requested variables (probably
+#'         as doubles) and might contain a column 'datetime' (as string).
+#'         Note that the datetime is defined by package CFtime and can contain
+#'         dates such as "2021-02-30 12:00:00", which are valid for 360-day
+#'         calendars but not for POSIXt. Because of that these dates need to be
+#'         parsed separately.
 #' @export
 
-nclist_to_df_byfil <- function(
+ncfile_to_df <- function(
     filnam,
-    ilon = NA,
-    varnam,
+    ilon = NA, # ilon_lower, ilon_upper,
+    varnames,
     lonnam,
     latnam,
     timenam,
@@ -158,14 +163,14 @@ nclist_to_df_byfil <- function(
   timenam%in% ncdf_available_dims$name || is.na(timenam) || stop(err_msg_time)
   err_msg_var <- sprintf(
     "For file %s:\n  Requested variable '%s', which is not among available variables: %s",
-    filnam, varnam, paste0(ncdf_available_vars$name, collapse = ","))
-  varnam %in% ncdf_available_vars$name || stop(err_msg_var)
+    filnam, varnames, paste0(ncdf_available_vars$name, collapse = ","))
+  varnames %in% ncdf_available_vars$name || stop(err_msg_var)
 
   # get data
   if (identical(NA, ilon)){
-    # get all data i.e. do not filter ncdf
+    # get all data i.e. do not subset ncdf
   } else {
-    # filter data to longitudinal band `ilon`
+    # subset data to longitudinal band `ilon`
     # deal with dynamic longitude dimension name
     if (lonnam == "lon"){
       ncdf <- tidync::hyper_filter(ncdf, lon = dplyr::near(index, ilon))
@@ -177,7 +182,7 @@ nclist_to_df_byfil <- function(
   }
   # collect data into tibble
   df <- ncdf |>
-    tidync::hyper_tibble(tidyselect::vars_pull(varnam),
+    tidync::hyper_tibble(tidyselect::vars_pull(varnames),
                          drop=FALSE) |>
     # hardcode colnames: lon and lat as longitude and latitude, and datetime
     # dplyr::rename(lon = !!lonnam, lat = !!latnam) |>
@@ -201,7 +206,8 @@ nclist_to_df_byfil <- function(
     }
   }
 
-  if (is.na(fgetdate)){ # IF NEEDED (i.e. only with old version of tidync)
+  # IF NEEDED (i.e. only with tidync version <0.3.0.9002)
+  if (is.na(fgetdate)){
     if (!is.na(timenam)){# parse integer datetime if timenam provided
 
       # with tidync v 0.3.0.9002 nothing needed: https://github.com/ropensci/tidync/issues/54
