@@ -50,8 +50,9 @@ get_longitude_value_indices <- function(ncdf, lonnam){
 #'         dates such as "2021-02-30 12:00:00", which are valid for 360-day
 #'         calendars but not for POSIXt. Because of that these dates need to be
 #'         parsed separately.
-#'         If \code{!is.na(outdir)}, then RDS files are generated in
-#'         \code{outdir} and column 'data' contains an output message.
+#'         If \code{!is.na(outdir)}, then an RDS file is generated in
+#'         \code{outdir} and column 'data' of return value contains a status
+#'         message only instead of data.
 #' @export
 
 nclist_to_df_byilon <- function(
@@ -70,11 +71,8 @@ nclist_to_df_byilon <- function(
   # CRAN HACK, use .data$ syntax for correct fix
   lat <- lon <- value <- NULL
 
+  # create file name
   if (!is.na(outdir)){
-    if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
-    file.access(dirname(outdir), mode = 2)[[1]] == 0 ||
-      stop(sprintf("Path (%s) is not writable. Do you need to 'sudo chmod'?", outdir))
-
     df_indices <- get_longitude_value_indices(nclist[1], lonnam)
     lon_values <- ifelse(
       is.na(ilon),
@@ -233,7 +231,7 @@ ncfile_to_df <- function(
 
   # Overwrite parsed time if fgetdate provided
   if (!is.na(fgetdate)){
-    # if fgetdate provided, use this function to derive time(s) from filename
+    # if fgetdate provided, use this function to derive time(s) from nc file name
     if (!is.na(timenam)){
       df <- df |>
         dplyr::mutate(!!timenam := fgetdate(filnam))

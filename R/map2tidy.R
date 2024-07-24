@@ -88,6 +88,13 @@ map2tidy <- function(
   }
   ncores <- min(ncores, nrow(ilon_arg))
 
+  # If needed: create out folder and check access
+  if (!is.na(outdir)){
+    if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
+    file.access(dirname(outdir), mode = 2)[[1]] == 0 ||
+      stop(sprintf("Path (%s) is not writable. Do you need to 'sudo chmod'?", outdir))
+  }
+
   # Message out
   msg1 <- paste0("START ================ ", format(Sys.time(), "%b %d, %Y, %X"))
   message(msg1)
