@@ -18,7 +18,7 @@ Imports:
     tidyr,
     tidyselect,
     ncdf4,
-    tidync (>= 0.3.0.9002),
+    tidync,
     CFtime,
     readr,
     lubridate,

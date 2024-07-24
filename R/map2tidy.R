@@ -80,7 +80,7 @@ map2tidy <- function(
   ilon_arg <- if (do_chunks){
     df_indices # chunking by longitude over multiple cores or single cores
   } else {
-    tibble(lon_value="all", lon_index = NA_integer_) # no chunking. read entire files.
+    dplyr::tibble(lon_value="all", lon_index = NA_integer_) # no chunking. read entire files.
   }
 
   if (ncores=="all"){
@@ -93,7 +93,7 @@ map2tidy <- function(
   message(paste0(
     "Extract variable(s): ", paste0(varnames, collapse = ","), ",\n",
     "(in ",
-    ifelse(first(is.na(ilon_arg$lon_index)),
+    ifelse(dplyr::first(is.na(ilon_arg$lon_index)),
            "1 spatial chunk",
            sprintf("spatial chunks %d to %d", min(ilon_arg$lon_index), max(ilon_arg$lon_index))),
     ifelse(ncores>1,
@@ -101,7 +101,7 @@ map2tidy <- function(
            ""),
     "),\n",
     "from the following NetCDF map files:\n    ",
-    paste0(c(head(nclist), "...", tail(nclist)), collapse = ",\n    "),
+    paste0(c(utils::head(nclist), "...", utils::tail(nclist)), collapse = ",\n    "),
     ".\n"
     ))
 
@@ -154,8 +154,9 @@ map2tidy <- function(
     )
 
   # Message
-  msg <- tidync::tidync(nclist[1]) |> capture.output()
-  msg <- stringi::stri_remove_empty(gsub("^[ ]*$","",msg))
+  msg <- tidync::tidync(nclist[1]) |> utils::capture.output()
+  msg <- gsub("^[ ]*$","", msg) # Remove strings containing only whitespaces
+  msg <- msg[nzchar(msg)]       # Remove empty strings
   # message("Extent of first file:")
   message(paste0(msg, collapse = "\n"))
   message(paste0("DONE ================ ", format(Sys.time(), "%b %d, %Y, %X")))

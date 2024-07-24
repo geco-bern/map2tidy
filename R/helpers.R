@@ -1,18 +1,20 @@
 #' Returns a data.frame defining longitude value and longitude index for a given
 #' NetCDF file
 #'
-#' @param ncfile A character string specifying the complete path to a NetCDF file.
+#' @param ncdf Either a character string specifying the complete path to a
+#' NetCDF file, or an object of class \code{tidync::tidync}.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #'
 #' @return Tidy tibble containing the variables 'varnames'.
 
 get_longitude_value_indices <- function(ncdf, lonnam){
-  if (class(ncdf) == "tidync") {
+  if (is(ncdf, "tidync")) {
   } else {
     ncdf <- tidync::tidync(ncdf)
   }
   res <- ncdf$transforms[[lonnam]][, c(lonnam, "index")]
-  return(dplyr::rename(res, lon_value=lonnam, lon_index="index"))
+  res <- dplyr::rename(res, dplyr::all_of(c(lon_value=lonnam, lon_index="index")))
+  return(res)
 }
 
 #' Returns a tidy data.frame from a list of NetCDF file(s),
@@ -78,7 +80,7 @@ nclist_to_df_byilon <- function(
       sprintf("%+.3f_to_%+.3f",
               min(df_indices$lon_value), max(df_indices$lon_value)),
       sprintf("%+.3f",   # "%+.3g",
-              pull(filter(df_indices, lon_index == ilon), "lon_value"))
+              dplyr::pull(dplyr::filter(df_indices, lon_index == ilon), "lon_value"))
     )
     outpath <- paste0(file.path(outdir, fileprefix), "_LON_", lon_values, ".rds")
   }
@@ -86,7 +88,7 @@ nclist_to_df_byilon <- function(
   if (is.na(outdir) || !file.exists(outpath) || overwrite){
 
     # get data from all files at given longitude index ilon
-    df <- purrr::map(
+    df_list <- purrr::map(
       as.list(nclist),
       ~ncfile_to_df(.,
                     ilon,
@@ -101,15 +103,15 @@ nclist_to_df_byilon <- function(
     # check if any element has zero rows and drop that element
     drop_zerorows <- function(y) { return(y[!sapply(y,
                                                     function(x) nrow(x)==0 )]) }
-    df <- df |>
+    df <- df_list |>
       drop_zerorows() |>
       dplyr::bind_rows()
 
     # nest only if there is a time dimension
     if ("datetime" %in% names(tidyr::unnest(df, data))){
       df <- df |>
-        tidyr::unnest(data) |>        # unnest the rows from individual NetCDF files
-        tidyr::nest(!c(lon, lat)) |>  # nest the rows for same coords across NetCDF files
+        tidyr::unnest(data) |>               # unnest the rows from individual NetCDF files
+        tidyr::nest(data = !c(lon, lat)) |>  # nest the rows for same coords across NetCDF files
         dplyr::arrange(lon, lat) |>
         dplyr::mutate(data = purrr::map(data, ~dplyr::arrange(., datetime)))
     } else {
@@ -268,5 +270,5 @@ ncfile_to_df <- function(
     }
   }
 
-  return(df |> tidyr::nest(!c(lon, lat)))
+  return(df |> tidyr::nest(data = !c(lon, lat)))
 }
