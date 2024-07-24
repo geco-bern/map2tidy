@@ -198,9 +198,9 @@ ncfile_to_df <- function(
   latnam %in% ncdf_available_dims$name || stop(err_msg_lat)
   timenam%in% ncdf_available_dims$name || is.na(timenam) || stop(err_msg_time)
   err_msg_var <- sprintf(
-    "For file %s:\n  Requested variable '%s', which is not among available variables: %s",
-    filnam, varnames, paste0(ncdf_available_vars$name, collapse = ","))
-  varnames %in% ncdf_available_vars$name || stop(err_msg_var)
+    "For file %s:\n  Requested variable(s) '%s', which are not all among available variables: %s",
+    filnam, paste0(varnames, collapse = ","), paste0(ncdf_available_vars$name, collapse = ","))
+  all(varnames %in% ncdf_available_vars$name) || stop(err_msg_var)
 
   # get data
   if (is.na(ilon)){
