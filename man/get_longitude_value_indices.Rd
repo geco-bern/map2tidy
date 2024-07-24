@@ -14,7 +14,7 @@ NetCDF file, or an object of class \code{tidync::tidync}.}
 \item{lonnam}{The dimension name of longitude in the NetCDF files.}
 }
 \value{
-Tidy tibble containing the variables 'varnames'.
+Tidy tibble containing the variables 'varnam'.
 }
 \description{
 Returns a data.frame defining longitude value and longitude index for a given

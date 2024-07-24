@@ -6,7 +6,7 @@
 \usage{
 map2tidy(
   nclist,
-  varnames,
+  varnam,
   lonnam = "lon",
   latnam = "lat",
   timenam = NA,
@@ -22,7 +22,7 @@ map2tidy(
 \item{nclist}{A vector of character strings specifying the complete paths to
 files.}
 
-\item{varnames}{The variable name(s) for which data is to be read from the
+\item{varnam}{The variable name(s) for which data is to be read from the
 NetCDF files.}
 
 \item{lonnam}{The dimension name of longitude in the NetCDF files.}

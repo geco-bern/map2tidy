@@ -7,7 +7,7 @@
 #'
 #' @param nclist A vector of character strings specifying the complete paths to
 #' files.
-#' @param varnames The variable name(s) for which data is to be read from the
+#' @param varnam The variable name(s) for which data is to be read from the
 #' NetCDF files.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #' @param latnam The dimension name of latitude in the NetCDF files.
@@ -49,7 +49,7 @@
 
 map2tidy <- function(
   nclist,
-  varnames,
+  varnam,
   lonnam     = "lon",
   latnam     = "lat",
   timenam    = NA,
@@ -99,7 +99,7 @@ map2tidy <- function(
   msg1 <- paste0("START ================ ", format(Sys.time(), "%b %d, %Y, %X"))
   message(msg1)
   msg2 <- paste0(
-    "Extract variable(s): ", paste0(varnames, collapse = ","), ",\n",
+    "Extract variable(s): ", paste0(varnam, collapse = ","), ",\n",
     "(in ",
     ifelse(dplyr::first(is.na(ilon_arg$lon_index)),
            "1 spatial chunk",
@@ -131,7 +131,7 @@ map2tidy <- function(
         nclist              = nclist,
         outdir              = outdir,
         fileprefix          = fileprefix,
-        varnames            = varnames,
+        varnam            = varnam,
         lonnam              = lonnam,
         latnam              = latnam,
         timenam             = timenam,
@@ -158,13 +158,14 @@ map2tidy <- function(
           .,
           outdir,
           fileprefix,
-          varnames,
+          varnam,
           lonnam,
           latnam,
           timenam,
           fgetdate,
           overwrite
-        ))
+        ),
+        .progress=TRUE)
     )
 
   # Message

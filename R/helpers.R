@@ -5,7 +5,7 @@
 #' NetCDF file, or an object of class \code{tidync::tidync}.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #'
-#' @return Tidy tibble containing the variables 'varnames'.
+#' @return Tidy tibble containing the variables 'varnam'.
 
 get_longitude_value_indices <- function(ncdf, lonnam){
   if (is(ncdf, "tidync")) {
@@ -22,7 +22,7 @@ get_longitude_value_indices <- function(ncdf, lonnam){
 #'
 #' @param nclist A vector of character strings specifying the complete paths to
 #' files.
-#' @param varnames The variable name(s) for which data is to be read from the
+#' @param varnam The variable name(s) for which data is to be read from the
 #' NetCDF files.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
 #' @param latnam The dimension name of latitude in the NetCDF files.
@@ -41,7 +41,7 @@ get_longitude_value_indices <- function(ncdf, lonnam){
 #' @param overwrite A logical indicating whether time series files are to be
 #' overwritten.
 #'
-#' @return Tidy tibble containing the variables 'varnames'.
+#' @return Tidy tibble containing the variables 'varnam'.
 #'         Tibble contains columns 'lon' (double), 'lat' (double), and a nested
 #'         column 'data'.
 #'         Column 'data' contains requested variables (probably
@@ -60,7 +60,7 @@ nclist_to_df_byilon <- function(
     ilon,
     outdir,
     fileprefix,
-    varnames,
+    varnam,
     lonnam,
     latnam,
     timenam,
@@ -91,7 +91,7 @@ nclist_to_df_byilon <- function(
       as.list(nclist),
       ~ncfile_to_df(.,
                     ilon,
-                    varnames = varnames,
+                    varnam = varnam,
                     lonnam = lonnam,
                     latnam = latnam,
                     timenam = timenam,
@@ -146,7 +146,7 @@ nclist_to_df_byilon <- function(
 #' If provided, ilon overrides that the function extracts data for all longitude indices. If
 #' omitted (the default: \code{ilon = NA}), the function returns tidy data for
 #' all longitude indices.
-#' @param varnames The variable name(s) for which data is to be read from the
+#' @param varnam The variable name(s) for which data is to be read from the
 #' NetCDF file.
 #' @param lonnam The dimension name of longitude in the NetCDF file.
 #' @param latnam The dimension name of latitude in the NetCDF file.
@@ -154,7 +154,7 @@ nclist_to_df_byilon <- function(
 #' @param fgetdate A function to derive the date(s) used for the time dimension
 #' based on the file name.
 #'
-#' @return Tidy tibble containing the variables 'varnames'.
+#' @return Tidy tibble containing the variables 'varnam'.
 #'         Tibble contains columns 'lon' (double), 'lat' (double), and a nested
 #'         column 'data'.
 #'         Column 'data' contains requested variables (probably
@@ -168,7 +168,7 @@ nclist_to_df_byilon <- function(
 ncfile_to_df <- function(
     filnam,
     ilon = NA,
-    varnames,
+    varnam,
     lonnam,
     latnam,
     timenam,
@@ -197,8 +197,8 @@ ncfile_to_df <- function(
   timenam%in% ncdf_available_dims$name || is.na(timenam) || stop(err_msg_time)
   err_msg_var <- sprintf(
     "For file %s:\n  Requested variable(s) '%s', which are not all among available variables: %s",
-    filnam, paste0(varnames, collapse = ","), paste0(ncdf_available_vars$name, collapse = ","))
-  all(varnames %in% ncdf_available_vars$name) || stop(err_msg_var)
+    filnam, paste0(varnam, collapse = ","), paste0(ncdf_available_vars$name, collapse = ","))
+  all(varnam %in% ncdf_available_vars$name) || stop(err_msg_var)
 
   # get data
   if (is.na(ilon)){
@@ -216,7 +216,7 @@ ncfile_to_df <- function(
   }
   # collect data into tibble
   df <- ncdf |>
-    tidync::hyper_tibble(tidyselect::vars_pull(varnames),
+    tidync::hyper_tibble(tidyselect::vars_pull(varnam),
                          drop=FALSE) |>
     # hardcode colnames: lon and lat as longitude and latitude, and datetime
     # dplyr::rename(lon = !!lonnam, lat = !!latnam) |>

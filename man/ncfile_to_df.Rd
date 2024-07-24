@@ -5,7 +5,7 @@
 \title{Returns a tidy data.frame from a single NetCDF file,
 optionally subsetting a single longitudinal band}
 \usage{
-ncfile_to_df(filnam, ilon = NA, varnames, lonnam, latnam, timenam, fgetdate)
+ncfile_to_df(filnam, ilon = NA, varnam, lonnam, latnam, timenam, fgetdate)
 }
 \arguments{
 \item{filnam}{file name}
@@ -15,7 +15,7 @@ If provided, ilon overrides that the function extracts data for all longitude in
 omitted (the default: \code{ilon = NA}), the function returns tidy data for
 all longitude indices.}
 
-\item{varnames}{The variable name(s) for which data is to be read from the
+\item{varnam}{The variable name(s) for which data is to be read from the
 NetCDF file.}
 
 \item{lonnam}{The dimension name of longitude in the NetCDF file.}
@@ -28,7 +28,7 @@ NetCDF file.}
 based on the file name.}
 }
 \value{
-Tidy tibble containing the variables 'varnames'.
+Tidy tibble containing the variables 'varnam'.
 Tibble contains columns 'lon' (double), 'lat' (double), and a nested
 column 'data'.
 Column 'data' contains requested variables (probably

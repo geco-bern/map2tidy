@@ -10,7 +10,7 @@ nclist_to_df_byilon(
   ilon,
   outdir,
   fileprefix,
-  varnames,
+  varnam,
   lonnam,
   latnam,
   timenam,
@@ -33,7 +33,7 @@ frames are written using the \code{save} statement. If omitted (defaults to
 
 \item{fileprefix}{A character string specifying the file name prefix.}
 
-\item{varnames}{The variable name(s) for which data is to be read from the
+\item{varnam}{The variable name(s) for which data is to be read from the
 NetCDF files.}
 
 \item{lonnam}{The dimension name of longitude in the NetCDF files.}
@@ -50,7 +50,7 @@ based on the file name.}
 overwritten.}
 }
 \value{
-Tidy tibble containing the variables 'varnames'.
+Tidy tibble containing the variables 'varnam'.
 Tibble contains columns 'lon' (double), 'lat' (double), and a nested
 column 'data'.
 Column 'data' contains requested variables (probably
@@ -59,8 +59,9 @@ Note that the datetime is defined by package CFtime and can contain
 dates such as "2021-02-30 12:00:00", which are valid for 360-day
 calendars but not for POSIXt. Because of that these dates need to be
 parsed separately.
-If \code{!is.na(outdir)}, then RDS files are generated in
-\code{outdir} and column 'data' contains an output message.
+If \code{!is.na(outdir)}, then an RDS file is generated in
+\code{outdir} and column 'data' of return value contains a status
+message only instead of data.
 }
 \description{
 Returns a tidy data.frame from a list of NetCDF file(s),
