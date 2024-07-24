@@ -66,46 +66,45 @@ map2tidy <- function(
     warning("Warning: using multiple cores (ncores > 1) only takes effect when
             do_chunks is TRUE.")
   }
-
-  # Determine longitude indices for chunks
-  # open one file to get longitude information: length of longitude dimension
-  # tidync::tidync(nclist[1])
-  meta_dims <- tidync::hyper_dims(tidync::tidync(nclist[1]))
-  nlon <- meta_dims |>
-    dplyr::filter(name == lonnam) |>
-    dplyr::pull(length)
   if (do_chunks){
     # check if necessary arguments are provided
-    if (identical(NA, outdir) || identical(NA, fileprefix)){
+    if (is.na(outdir) || is.na(fileprefix)){
       stop("Error: arguments outdir and fileprefix must be specified when do_chunks is TRUE.")
     }
   }
-  ilon_arg <- if (do_chunks){
-    seq(nlon) # chunking by longitude over multiple cores or single cors
-  } else {
-    NA        # no chunking. read entire files.
-  }
 
+  # Determine longitude indices for chunks
+  # open one file to get longitude information: length of longitude dimension
+  df_indices <- get_longitude_value_indices(nclist[1], lonnam)
+  # meta_dims <- tidync::hyper_dims(tidync::tidync(nclist[1]))
+  ilon_arg <- if (do_chunks){
+    df_indices # chunking by longitude over multiple cores or single cores
+  } else {
+    tibble(lon_value="all", lon_index = NA_integer_) # no chunking. read entire files.
+  }
 
   if (ncores=="all"){
     ncores <- parallel::detectCores() - 1
   }
-  ncores <- min(ncores, length(ilon_arg))
+  ncores <- min(ncores, nrow(ilon_arg))
 
   # Message out
   message(paste0("START ================ ", format(Sys.time(), "%b %d, %Y, %X")))
   message(paste0(
-    "Create tidy dataframes for following NetCDF map files:\n    ",
-    paste0(nclist, collapse = ",\n    "),
-    "\nand extract variable(s): ", paste0(varnames, collapse = ","),
-    "; (in ",
-    ifelse(is.na(ilon_arg),
+    "Extract variable(s): ", paste0(varnames, collapse = ","), ",\n",
+    "(in ",
+    ifelse(first(is.na(ilon_arg$lon_index)),
            "1 spatial chunk",
-           sprintf("spatial chunks %d to %d", min(ilon_arg), max(ilon_arg))),
+           sprintf("spatial chunks %d to %d", min(ilon_arg$lon_index), max(ilon_arg$lon_index))),
     ifelse(ncores>1,
-           sprintf(", distributed over %d workers", ncores),
+           sprintf(", distributed over %d workers (i.e CPU cores)", ncores),
            ""),
-    ")."))
+    "),\n",
+    "from the following NetCDF map files:\n    ",
+    paste0(c(head(nclist), "...", tail(nclist)), collapse = ",\n    "),
+    ".\n"
+    ))
+
 
   # collect time series per longitude slice and create separate files per longitude slice.
 
@@ -130,11 +129,12 @@ map2tidy <- function(
     # distribute to cores, making sure all data from a specific site is sent to the same core
     parition_if_requested <- function(x, cl) {multidplyr::partition(x, cl)}
   } else {
+    cl <- NULL
     parition_if_requested <- function(x, cl) {x} # no-effect-placeholder-function
   }
 
   # Loop over ilon_arg (and within nclist_to_df_byilon loop over nclist)
-  out <- dplyr::tibble(lon_index = ilon_arg) |>
+  res <- ilon_arg |>
     parition_if_requested(cl) |>
     dplyr::mutate(
       out = purrr::map(

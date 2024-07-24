@@ -1,3 +1,20 @@
+#' Returns a data.frame defining longitude value and longitude index for a given
+#' NetCDF file
+#'
+#' @param ncfile A character string specifying the complete path to a NetCDF file.
+#' @param lonnam The dimension name of longitude in the NetCDF files.
+#'
+#' @return Tidy tibble containing the variables 'varnames'.
+
+get_longitude_value_indices <- function(ncdf, lonnam){
+  if (class(ncdf) == "tidync") {
+  } else {
+    ncdf <- tidync::tidync(ncdf)
+  }
+  res <- ncdf$transforms[[lonnam]][, c(lonnam, "index")]
+  return(dplyr::rename(res, lon_value=lonnam, lon_index="index"))
+}
+
 #' Returns a tidy data.frame from a list of NetCDF file(s),
 #' optionally subsetting a single a longitudinal band
 #'
@@ -54,9 +71,16 @@ nclist_to_df_byilon <- function(
   if (!is.na(outdir)){
     # check whether output has been created already (otherwise do nothing)
     if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
-    outpath <- ifelse(is.na(ilon),
-      paste0(outdir, "/", fileprefix, ".rds"),
-      paste0(outdir, "/", fileprefix, "_ilon_", ilon, ".rds"))
+
+    df_indices <- get_longitude_value_indices(nclist[1], lonnam)
+    lon_values <- ifelse(
+      is.na(ilon),
+      sprintf("%+.3f_to_%+.3f",
+              min(df_indices$lon_value), max(df_indices$lon_value)),
+      sprintf("%+.3f",   # "%+.3g",
+              pull(filter(df_indices, lon_index == ilon), "lon_value"))
+    )
+    outpath <- paste0(file.path(outdir, fileprefix), "_LON_", lon_values, ".rds")
   }
 
   if (is.na(outdir) || !file.exists(outpath) || overwrite){
@@ -142,7 +166,7 @@ nclist_to_df_byilon <- function(
 
 ncfile_to_df <- function(
     filnam,
-    ilon = NA, # ilon_lower, ilon_upper,
+    ilon = NA,
     varnames,
     lonnam,
     latnam,
@@ -176,7 +200,7 @@ ncfile_to_df <- function(
   varnames %in% ncdf_available_vars$name || stop(err_msg_var)
 
   # get data
-  if (identical(NA, ilon)){
+  if (is.na(ilon)){
     # get all data i.e. do not subset ncdf
   } else {
     # subset data to longitudinal band `ilon`
