@@ -6,7 +6,7 @@
 \usage{
 map2tidy(
   nclist,
-  varnam,
+  varnames,
   lonnam = "lon",
   latnam = "lat",
   timenam = NA,
@@ -22,14 +22,14 @@ map2tidy(
 \item{nclist}{A vector of character strings specifying the complete paths to
 files.}
 
-\item{varnam}{The variable name(s) for which data is to be read from NetCDF
-files.}
+\item{varnames}{The variable name(s) for which data is to be read from the
+NetCDF files.}
 
 \item{lonnam}{The dimension name of longitude in the NetCDF files.}
 
 \item{latnam}{The dimension name of latitude in the NetCDF files.}
 
-\item{timenam}{The name of dimension variable used for timein the NetCDF
+\item{timenam}{The name of dimension variable used for time in the NetCDF
 files. Defaults to \code{NA}.}
 
 \item{do_chunks}{A logical specifying whether chunks of data should be

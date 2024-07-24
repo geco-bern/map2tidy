@@ -2,7 +2,8 @@
 % Please edit documentation in R/helpers.R
 \name{nclist_to_df_byilon}
 \alias{nclist_to_df_byilon}
-\title{Returns a tidy data frame from a NetCDF file for a longitudinal band}
+\title{Returns a tidy data.frame from a list of NetCDF file(s),
+optionally subsetting a single a longitudinal band}
 \usage{
 nclist_to_df_byilon(
   nclist,
@@ -21,11 +22,10 @@ nclist_to_df_byilon(
 \item{nclist}{A vector of character strings specifying the complete paths to
 files.}
 
-\item{ilon}{An integer specifying an individual longitude index for chunking
-all processing and writing chunks to separate output files. If provided,
-it overrides that the function extracts data for all longitude indices. If
-omitted (\code{ilon = NA}), the function outputs/returns tidy data for all
-longitude indexes.}
+\item{ilon}{An integer specifying an individual longitude index to subset.
+If provided, only longitude index 'ilon' is extracted. If omitted
+(\code{ilon = NA}), the function returns tidy data for all longitude
+indexes.}
 
 \item{outdir}{A character string specifying output directory where data
 frames are written using the \code{save} statement. If omitted (defaults to
@@ -33,25 +33,36 @@ frames are written using the \code{save} statement. If omitted (defaults to
 
 \item{fileprefix}{A character string specifying the file name prefix.}
 
-\item{varnames}{The variable name(s) for which data is to be read from NetCDF
-files.}
+\item{varnames}{The variable name(s) for which data is to be read from the
+NetCDF files.}
 
 \item{lonnam}{The dimension name of longitude in the NetCDF files.}
 
 \item{latnam}{The dimension name of latitude in the NetCDF files.}
 
-\item{timenam}{The name of dimension variable used for timein the NetCDF
-files. Defaults to \code{NA}.}
+\item{timenam}{The name of dimension variable used for time in the NetCDF
+files.}
 
-\item{fgetdate}{A function to derive the date used for the time dimension
+\item{fgetdate}{A function to derive the date(s) used for the time dimension
 based on the file name.}
 
 \item{overwrite}{A logical indicating whether time series files are to be
 overwritten.}
 }
 \value{
-not sure
+Tidy tibble containing the variables 'varnames'.
+Tibble contains columns 'lon' (double), 'lat' (double), and a nested
+column 'data'.
+Column 'data' contains requested variables (probably
+as doubles) and might contain a column 'datetime' (as string).
+Note that the datetime is defined by package CFtime and can contain
+dates such as "2021-02-30 12:00:00", which are valid for 360-day
+calendars but not for POSIXt. Because of that these dates need to be
+parsed separately.
+If \code{!is.na(outdir)}, then RDS files are generated in
+\code{outdir} and column 'data' contains an output message.
 }
 \description{
-Returns a tidy data frame from a NetCDF file for a longitudinal band
+Returns a tidy data.frame from a list of NetCDF file(s),
+optionally subsetting a single a longitudinal band
 }

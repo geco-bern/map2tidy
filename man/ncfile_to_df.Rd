@@ -12,8 +12,8 @@ ncfile_to_df(filnam, ilon = NA, varnames, lonnam, latnam, timenam, fgetdate)
 
 \item{ilon}{An integer specifying an individual longitude index to subset.
 If provided, ilon overrides that the function extracts data for all longitude indices. If
-omitted (\code{ilon = NA}), the function returns tidy data for all longitude
-indexes.}
+omitted (the default: \code{ilon = NA}), the function returns tidy data for
+all longitude indices.}
 
 \item{varnames}{The variable name(s) for which data is to be read from the
 NetCDF file.}
@@ -30,7 +30,8 @@ based on the file name.}
 \value{
 Tidy tibble containing the variables 'varnames'.
 Tibble contains columns 'lon' (double), 'lat' (double), and a nested
-column 'data'. Column 'data' contains requested variables (probably
+column 'data'.
+Column 'data' contains requested variables (probably
 as doubles) and might contain a column 'datetime' (as string).
 Note that the datetime is defined by package CFtime and can contain
 dates such as "2021-02-30 12:00:00", which are valid for 360-day
