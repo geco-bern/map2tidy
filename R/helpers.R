@@ -71,8 +71,9 @@ nclist_to_df_byilon <- function(
   lat <- lon <- value <- NULL
 
   if (!is.na(outdir)){
-    # check whether output has been created already (otherwise do nothing)
     if (!dir.exists(outdir)){system(paste0("mkdir -p ", outdir))}
+    file.access(dirname(outdir), mode = 2)[[1]] == 0 ||
+      stop(sprintf("Path (%s) is not writable. Do you need to 'sudo chmod'?", outdir))
 
     df_indices <- get_longitude_value_indices(nclist[1], lonnam)
     lon_values <- ifelse(
