@@ -93,6 +93,7 @@ map2tidy <- function(
   ncores <- min(ncores, length(ilon_arg))
 
   # Message out
+  message(paste0("START ================ ", format(Sys.time(), "%b %d, %Y, %X")))
   message(paste0(
     "Create tidy dataframes for following NetCDF map files:\n    ",
     paste0(nclist, collapse = ",\n    "),
@@ -152,7 +153,14 @@ map2tidy <- function(
         ))
     )
 
-  return(dplyr::collect(out) |> tidyr::unnest(out) |> dplyr::arrange(lon) |>
-           dplyr::select(!lon_index))
-  # return(dplyr::collect(out) |> tidyr::unnest(out))
+  # Message
+  msg <- tidync::tidync(nclist[1]) |> capture.output()
+  msg <- stringi::stri_remove_empty(gsub("^[ ]*$","",msg))
+  # message("Extent of first file:")
+  message(paste0(msg, collapse = "\n"))
+  message(paste0("DONE ================ ", format(Sys.time(), "%b %d, %Y, %X")))
+
+  return(dplyr::collect(res) |> tidyr::unnest(out) |> dplyr::arrange(lon) |>
+           dplyr::select(!c(lon_index, lon_value)))
+  # return(dplyr::collect(res) |> tidyr::unnest(out))
 }
