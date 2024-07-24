@@ -89,8 +89,9 @@ map2tidy <- function(
   ncores <- min(ncores, nrow(ilon_arg))
 
   # Message out
-  message(paste0("START ================ ", format(Sys.time(), "%b %d, %Y, %X")))
-  message(paste0(
+  msg1 <- paste0("START ================ ", format(Sys.time(), "%b %d, %Y, %X"))
+  message(msg1)
+  msg2 <- paste0(
     "Extract variable(s): ", paste0(varnames, collapse = ","), ",\n",
     "(in ",
     ifelse(dplyr::first(is.na(ilon_arg$lon_index)),
@@ -103,7 +104,13 @@ map2tidy <- function(
     "from the following NetCDF map files:\n    ",
     paste0(c(utils::head(nclist), "...", utils::tail(nclist)), collapse = ",\n    "),
     ".\n"
-    ))
+  )
+  message(msg2)
+  msg3 <- tidync::tidync(nclist[1]) |> utils::capture.output()
+  msg3 <- gsub("^[ ]*$","", msg3) # Remove strings containing only whitespaces
+  msg3 <- msg3[nzchar(msg3)]       # Remove empty strings
+  # message("Extent of first file:")
+  message(paste0(msg3, collapse = "\n"))
 
 
   # collect time series per longitude slice and create separate files per longitude slice.
@@ -154,11 +161,6 @@ map2tidy <- function(
     )
 
   # Message
-  msg <- tidync::tidync(nclist[1]) |> utils::capture.output()
-  msg <- gsub("^[ ]*$","", msg) # Remove strings containing only whitespaces
-  msg <- msg[nzchar(msg)]       # Remove empty strings
-  # message("Extent of first file:")
-  message(paste0(msg, collapse = "\n"))
   message(paste0("DONE ================ ", format(Sys.time(), "%b %d, %Y, %X")))
 
   return(dplyr::collect(res) |> tidyr::unnest(out) |> dplyr::arrange(lon) |>
