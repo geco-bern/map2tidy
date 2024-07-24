@@ -221,10 +221,10 @@ ncfile_to_df <- function(
                          drop=FALSE) |>
     # hardcode colnames: lon and lat as longitude and latitude, and datetime
     # dplyr::rename(lon = !!lonnam, lat = !!latnam) |>
-    dplyr::rename(dplyr::any_of(c(
-      lon      = lonnam,
-      lat      = latnam,
-      datetime = timenam))) |> # columns might or might not exist
+    dplyr::rename(dplyr::any_of(stats::na.omit(c(
+      lon      = lonnam,  # with any_of columns might or might not exist
+      lat      = latnam,  # with na.omit, NA in timenam is gracefully dealt with
+      datetime = timenam)))) |>
     # transform to numeric
     dplyr::mutate(lon = as.numeric(lon), lat = as.numeric(lat))
   # NOTE: df based on tidync (< v.0.3.0.9002) contains integer datetime column
