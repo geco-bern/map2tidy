@@ -32,7 +32,6 @@ map2tidy(
   lonnam = "lon", 
   latnam = "lat", 
   timenam = "time", 
-  timedimnam = "time",
   do_chunks = TRUE,
   outdir = tempdir(), 
   fileprefix = "demo_data_2017", 
@@ -127,8 +126,7 @@ cl <- multidplyr::new_cluster(ncores) %>%
                                 "purrr", 
                                 "tidyr", 
                                 "readr",
-                                "here",
-                                "magrittr")) %>%
+                                "here")) %>%
   multidplyr::cluster_assign(add_loess_byilon = add_loess_byilon)
 
 # distribute computation across the cores, calculating for all longitudinal 

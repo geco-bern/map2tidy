@@ -1,6 +1,6 @@
 Package: map2tidy
 Title: Map Spatio-temporal NetCDF Stacks Along Time
-Version: 1.0
+Version: 1.0.9000
 Authors@R: 
     person(
       given = "Benjamin",
@@ -17,16 +17,17 @@ Imports:
     purrr,
     tidyr,
     tidyselect,
-    magrittr,
-    ncmeta,
+    ncdf4,
     tidync,
+    CFtime,
     readr,
-    stringr,
     lubridate,
     parallel,
     multidplyr,
     utils,
     stats
+Remotes: 
+    tidync
 Suggests:
     rmarkdown,
     covr,
