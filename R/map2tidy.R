@@ -31,8 +31,8 @@
 #' @param overwrite A logical indicating whether time series files are to be
 #' overwritten.
 #'
-#' @importFrom utils data
-#' @importFrom stats time
+#' @importFrom rlang .data
+#' @importFrom utils capture.output
 #'
 #' @return Generates a tibble (containing columns 'lon' (double), 'lat' (double),
 #'         and nested column 'data'). Column 'data' contains requested variables
@@ -60,6 +60,9 @@ map2tidy <- function(
   fgetdate   = NA,
   overwrite  = FALSE
   ){
+
+  # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
+  index <- lat <- lon <- name <- value <- out <- datetime <- lon_index <- lon_value <- data <- time <- NULL
 
   # check plausibility of argument combination
   if ((ncores > 1 || ncores=="all") && !do_chunks){
@@ -172,7 +175,7 @@ map2tidy <- function(
   # Warning if unusual
   if (!is.na(outdir)){
     unusual_outputs <- dplyr::collect(res) |> tidyr::unnest(out) |>
-      dplyr::filter(!grepl("^Written data", data)) # select only unusual
+      dplyr::filter(!grepl("^Written data", .data$data)) # select only unusual
     if (nrow(unusual_outputs) > 0){
       message(paste0(c("Some data appeared unusual:",
                        capture.output(unusual_outputs)),#[-1]), # -1 drops A tibble:

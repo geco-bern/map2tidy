@@ -8,7 +8,7 @@
 #' @return Tidy tibble containing the variables 'varnam'.
 
 get_longitude_value_indices <- function(ncdf, lonnam){
-  if (is(ncdf, "tidync")) {
+  if (methods::is(ncdf, "tidync")) {
   } else {
     ncdf <- tidync::tidync(ncdf)
   }
@@ -68,8 +68,8 @@ nclist_to_df_byilon <- function(
     overwrite
 ){
 
-  # CRAN HACK, use .data$ syntax for correct fix
-  lat <- lon <- value <- NULL
+  # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
+  index <- lat <- lon <- name <- value <- out <- datetime <- lon_index <- lon_value <- data <- time <- NULL
 
   # create file name
   if (!is.na(outdir)){
@@ -180,8 +180,8 @@ ncfile_to_df <- function(
     timenam,
     fgetdate
 ){
-  # CRAN HACK, use .data$ syntax for correct fix
-  index <- lat <- lon <- name <- value <- NULL
+  # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
+  index <- lat <- lon <- name <- value <- out <- datetime <- lon_index <- lon_value <- data <- time <- NULL
 
   # Setup extraction
   ncdf <- tidync::tidync(filnam)
@@ -240,8 +240,8 @@ ncfile_to_df <- function(
     # if fgetdate provided, use this function to derive time(s) from nc file name
     if (!is.na(timenam)){
       df <- df |>
-        arrange(datetime) |> # ensure properly ordered
-        group_by(lon, lat) |> mutate(datetime = fgetdate(filnam)) |> ungroup()
+        dplyr::arrange(datetime) |> # ensure properly ordered
+        dplyr::group_by(lon, lat) |> dplyr::mutate(datetime = fgetdate(filnam)) |> dplyr::ungroup()
     } else {
       warning("Ignored argument 'fgetdate', since no argument 'timenam' provided.")
     }

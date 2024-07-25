@@ -1,4 +1,6 @@
 add_loess_byilon <- function(ilon){
+  # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
+  index <- lat <- lon <- name <- value <- out <- datetime <- lon_index <- lon_value <- data <- time <- NULL
 
   # for the example in parallel_computation.Rmd
 
