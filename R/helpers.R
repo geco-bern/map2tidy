@@ -234,7 +234,8 @@ ncfile_to_df <- function(
     # if fgetdate provided, use this function to derive time(s) from nc file name
     if (!is.na(timenam)){
       df <- df |>
-        dplyr::mutate(!!timenam := fgetdate(filnam))
+        arrange(datetime) |> # ensure properly ordered
+        group_by(lon, lat) |> mutate(datetime = fgetdate(filnam)) |> ungroup()
     } else {
       warning("Ignored argument 'fgetdate', since no argument 'timenam' provided.")
     }
