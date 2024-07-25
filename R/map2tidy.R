@@ -170,6 +170,16 @@ map2tidy <- function(
 
   # Message
   message(paste0("DONE ================ ", format(Sys.time(), "%b %d, %Y, %X")))
+  # Warning if unusual
+  if (!is.na(outdir)){
+    unusual_outputs <- dplyr::collect(res) |> tidyr::unnest(out) |>
+      filter(!grepl("^Written data", data)) # select only unusual
+    if (nrow(unusual_outputs) > 0){
+      message(paste0(c("Some data appeared unusual:",
+                       capture.output(unusual_outputs)),#[-1]), # -1 drops A tibble:
+                     collapse = "\n"))
+    }
+  }
 
   return(dplyr::collect(res) |> tidyr::unnest(out) |> dplyr::arrange(lon) |>
            dplyr::select(!c(lon_index, lon_value)))

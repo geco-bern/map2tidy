@@ -103,7 +103,7 @@ nclist_to_df_byilon <- function(
     drop_zerorows <- function(y) { return(y[!sapply(y,
                                                     function(x) nrow(x)==0 )]) }
     df <- df_list |>
-      drop_zerorows() |>
+      # drop_zerorows() |>
       dplyr::bind_rows()
 
     # nest only if there is a time dimension
@@ -120,11 +120,17 @@ nclist_to_df_byilon <- function(
     }
 
     if (!is.na(outdir)){
-      message(paste("Writing file", outpath, "..."))
-      readr::write_rds(df, file = outpath)
-      # rm("df")
-      return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
-        data = paste0("Written data by worker with jobid: ", Sys.getpid(), " into file: ", outpath)))
+      if (nrow(df) > 0){
+        # message(paste("Writing file", outpath, "..."))
+        readr::write_rds(df, file = outpath)
+        return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
+          data = paste0("Written data by worker with jobid: ", Sys.getpid(), " into file: ", outpath)))
+      } else {
+        warning(paste("Omitting file", outpath, "..."))
+        return(dplyr::filter(df_indices, lon_index == ilon) |>
+                 dplyr::select(lon=lon_value) |> dplyr::mutate(
+          data = paste0("No data read in, and hence omitted writing out file: ", outpath)))
+      }
     } else {
       return(df)
     }
