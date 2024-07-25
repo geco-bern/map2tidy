@@ -108,7 +108,7 @@ map2tidy <- function(
            sprintf(", distributed over %d workers (i.e CPU cores)", ncores),
            ""),
     "),\n",
-    "from the following NetCDF map files:\n    ",
+    sprintf("from the following %d NetCDF map file(s):\n    ", length(nclist)),
     paste0(c(utils::head(nclist), "...", utils::tail(nclist)), collapse = ",\n    "),
     ".\n"
   )
@@ -116,8 +116,7 @@ map2tidy <- function(
   msg3 <- tidync::tidync(nclist[1]) |> utils::capture.output()
   msg3 <- gsub("^[ ]*$","", msg3) # Remove strings containing only whitespaces
   msg3 <- msg3[nzchar(msg3)]       # Remove empty strings
-  # message("Extent of first file:")
-  message(paste0(msg3, collapse = "\n"))
+  message(paste0(msg3, collapse = "\n")) # showing extent of first NetCDF file
 
 
   # collect time series per longitude slice and create separate files per longitude slice.

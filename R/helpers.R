@@ -115,7 +115,7 @@ nclist_to_df_byilon <- function(
         dplyr::mutate(data = purrr::map(data, ~dplyr::arrange(., datetime)))
     } else {
       df <- df |>
-        tidyr::unnest(data) |>        # unnest the rows from individual NetCDF files
+        tidyr::unnest(data) |>               # unnest the rows from individual NetCDF files
         dplyr::arrange(lon, lat)
     }
 
@@ -136,7 +136,7 @@ nclist_to_df_byilon <- function(
     }
 
   } else {
-    message(paste0("File exists already: ", outpath))
+    warning(paste0("File exists already: ", outpath))
     # return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
     #   data = paste0("File exists already: ", outpath)))  # NOTE: can't output lon value if we don't read the NCfile
     return(data.frame(lon=NA, data=paste0("File exists already: ", outpath)))
@@ -247,7 +247,7 @@ ncfile_to_df <- function(
     }
   }
 
-  # IF NEEDED (i.e. only with tidync version <0.3.0.9002)
+  # IF NEEDED (i.e. only with tidync version prior to 0.3.0.9002)
   if (is.na(fgetdate)){
     if (!is.na(timenam)){# parse integer datetime if timenam provided
 
