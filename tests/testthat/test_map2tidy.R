@@ -66,18 +66,24 @@ test_that("test map2tidy", {
     ncores = 6,
     overwrite = TRUE
   )
-  res2c <- map2tidy(  # do not overwrite
-    nclist = files,
-    varnam = "et",
-    lonnam = "lon",
-    latnam = "lat",
-    timenam = "time",
-    do_chunks = TRUE,
-    outdir = tmpdir,
-    fileprefix = "demo_data_2017",
-    ncores = 1,
-    overwrite = FALSE
+
+
+  testthat::expect_warning(
+    res2c <- map2tidy(  # do not overwrite
+      nclist = files,
+      varnam = "et",
+      lonnam = "lon",
+      latnam = "lat",
+      timenam = "time",
+      do_chunks = TRUE,
+      outdir = tmpdir,
+      fileprefix = "demo_data_2017",
+      ncores = 1,
+      overwrite = FALSE
+    ),
+    regexp = "File exists already:"
   )
+
   # Load some example files:
   df2  <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-0.025_to_+1.425.rds"))
   df2b3 <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-0.025.rds"))
