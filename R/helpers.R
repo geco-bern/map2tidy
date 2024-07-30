@@ -272,6 +272,14 @@ ncfile_to_df <- function(
         nc <- ncdf4::nc_open(filnam)
         units    <- nc$dim[[timenam]]$units
         calendar <- nc$dim[[timenam]]$calendar
+        if (length(calendar)==0 || is.null(calendar) || is.na(calendar) ||
+            units == "" ||
+            length(units)==0    || is.null(units)    || is.na(units)) {
+          stop(sprintf(paste0("The following file appears not to have valid timestamps, ",
+                              "please specify the times using argument 'fgetdate':\n",
+                              "%s"),
+                       filnam))
+        }
         ncdf4::nc_close(nc)
 
         df <- df |>
