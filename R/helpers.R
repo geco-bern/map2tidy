@@ -12,6 +12,14 @@ get_longitude_value_indices <- function(ncdf, lonnam){
   } else {
     ncdf <- tidync::tidync(ncdf)
   }
+
+  # check if requested longitude dimension exists
+  ncdf_available_dims <- tidync::hyper_dims(ncdf)
+  err_msg_lon <- sprintf(
+    "For file %s:\n  Provided name of longitudinal dimension as '%s', which is not among available dims: %s",
+    ncdf$source$source, lonnam, paste0(ncdf_available_dims$name, collapse = ","))
+  lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
+
   res <- ncdf$transforms[[lonnam]][, c(lonnam, "index")]
   res <- dplyr::rename(res, dplyr::all_of(c(lon_value=lonnam, lon_index="index")))
   return(res)
