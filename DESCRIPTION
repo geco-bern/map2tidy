@@ -1,6 +1,6 @@
 Package: map2tidy
 Title: Map Spatio-temporal NetCDF Stacks Along Time
-Version: 1.0.0.9000
+Version: 1.0.0.9001
 Authors@R: 
     person(
       given = "Benjamin",
@@ -13,6 +13,8 @@ Description: Make geospatial data with a time dimension into a tidy format. Faci
 Depends:
     R (>= 4.2)
 Imports:
+    rlang,
+    methods,
     dplyr,
     purrr,
     tidyr,
@@ -38,6 +40,6 @@ Suggests:
 License: AGPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 ByteCompile: true

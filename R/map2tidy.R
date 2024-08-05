@@ -31,8 +31,8 @@
 #' @param overwrite A logical indicating whether time series files are to be
 #' overwritten.
 #'
-#' @importFrom utils data
-#' @importFrom stats time
+#' @importFrom rlang .data
+#' @importFrom utils capture.output
 #'
 #' @return Generates a tibble (containing columns 'lon' (double), 'lat' (double),
 #'         and nested column 'data'). Column 'data' contains requested variables
@@ -60,6 +60,9 @@ map2tidy <- function(
   fgetdate   = NA,
   overwrite  = FALSE
   ){
+
+  # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
+  index <- lat <- lon <- name <- value <- out <- datetime <- lon_index <- lon_value <- data <- time <- NULL
 
   # check plausibility of argument combination
   if ((ncores > 1 || ncores=="all") && !do_chunks){
@@ -108,7 +111,7 @@ map2tidy <- function(
            sprintf(", distributed over %d workers (i.e CPU cores)", ncores),
            ""),
     "),\n",
-    "from the following NetCDF map files:\n    ",
+    sprintf("from the following %d NetCDF map file(s):\n    ", length(nclist)),
     paste0(c(utils::head(nclist), "...", utils::tail(nclist)), collapse = ",\n    "),
     ".\n"
   )
@@ -116,8 +119,7 @@ map2tidy <- function(
   msg3 <- tidync::tidync(nclist[1]) |> utils::capture.output()
   msg3 <- gsub("^[ ]*$","", msg3) # Remove strings containing only whitespaces
   msg3 <- msg3[nzchar(msg3)]       # Remove empty strings
-  # message("Extent of first file:")
-  message(paste0(msg3, collapse = "\n"))
+  message(paste0(msg3, collapse = "\n")) # showing extent of first NetCDF file
 
 
   # collect time series per longitude slice and create separate files per longitude slice.
@@ -170,6 +172,16 @@ map2tidy <- function(
 
   # Message
   message(paste0("DONE ================ ", format(Sys.time(), "%b %d, %Y, %X")))
+  # Warning if unusual
+  if (!is.na(outdir)){
+    unusual_outputs <- dplyr::collect(res) |> tidyr::unnest(out) |>
+      dplyr::filter(!grepl("^Written data", .data$data)) # select only unusual
+    if (nrow(unusual_outputs) > 0){
+      message(paste0(c("Some data appeared unusual:",
+                       capture.output(unusual_outputs)),#[-1]), # -1 drops A tibble:
+                     collapse = "\n"))
+    }
+  }
 
   return(dplyr::collect(res) |> tidyr::unnest(out) |> dplyr::arrange(lon) |>
            dplyr::select(!c(lon_index, lon_value)))

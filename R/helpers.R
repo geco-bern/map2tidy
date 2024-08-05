@@ -8,10 +8,18 @@
 #' @return Tidy tibble containing the variables 'varnam'.
 
 get_longitude_value_indices <- function(ncdf, lonnam){
-  if (is(ncdf, "tidync")) {
+  if (methods::is(ncdf, "tidync")) {
   } else {
     ncdf <- tidync::tidync(ncdf)
   }
+
+  # check if requested longitude dimension exists
+  ncdf_available_dims <- tidync::hyper_dims(ncdf)
+  err_msg_lon <- sprintf(
+    "For file %s:\n  Provided name of longitudinal dimension as '%s', which is not among available dims: %s",
+    ncdf$source$source, lonnam, paste0(ncdf_available_dims$name, collapse = ","))
+  lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
+
   res <- ncdf$transforms[[lonnam]][, c(lonnam, "index")]
   res <- dplyr::rename(res, dplyr::all_of(c(lon_value=lonnam, lon_index="index")))
   return(res)
@@ -68,8 +76,8 @@ nclist_to_df_byilon <- function(
     overwrite
 ){
 
-  # CRAN HACK, use .data$ syntax for correct fix
-  lat <- lon <- value <- NULL
+  # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
+  index <- lat <- lon <- name <- value <- out <- datetime <- lon_index <- lon_value <- data <- time <- NULL
 
   # create file name
   if (!is.na(outdir)){
@@ -103,7 +111,7 @@ nclist_to_df_byilon <- function(
     drop_zerorows <- function(y) { return(y[!sapply(y,
                                                     function(x) nrow(x)==0 )]) }
     df <- df_list |>
-      drop_zerorows() |>
+      # drop_zerorows() |>
       dplyr::bind_rows()
 
     # nest only if there is a time dimension
@@ -115,22 +123,28 @@ nclist_to_df_byilon <- function(
         dplyr::mutate(data = purrr::map(data, ~dplyr::arrange(., datetime)))
     } else {
       df <- df |>
-        tidyr::unnest(data) |>        # unnest the rows from individual NetCDF files
+        tidyr::unnest(data) |>               # unnest the rows from individual NetCDF files
         dplyr::arrange(lon, lat)
     }
 
     if (!is.na(outdir)){
-      message(paste("Writing file", outpath, "..."))
-      readr::write_rds(df, file = outpath)
-      # rm("df")
-      return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
-        data = paste0("Written data by worker with jobid: ", Sys.getpid(), " into file: ", outpath)))
+      if (nrow(df) > 0){
+        # message(paste("Writing file", outpath, "..."))
+        readr::write_rds(df, file = outpath)
+        return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
+          data = paste0("Written data by worker with jobid: ", Sys.getpid(), " into file: ", outpath)))
+      } else {
+        warning(paste("Omitting file", outpath, "..."))
+        return(dplyr::filter(df_indices, lon_index == ilon) |>
+                 dplyr::select(lon=lon_value) |> dplyr::mutate(
+          data = paste0("No data read in, and hence omitted writing out file: ", outpath)))
+      }
     } else {
       return(df)
     }
 
   } else {
-    message(paste0("File exists already: ", outpath))
+    warning(paste0("File exists already: ", outpath))
     # return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
     #   data = paste0("File exists already: ", outpath)))  # NOTE: can't output lon value if we don't read the NCfile
     return(data.frame(lon=NA, data=paste0("File exists already: ", outpath)))
@@ -174,8 +188,8 @@ ncfile_to_df <- function(
     timenam,
     fgetdate
 ){
-  # CRAN HACK, use .data$ syntax for correct fix
-  index <- lat <- lon <- name <- value <- NULL
+  # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
+  index <- lat <- lon <- name <- value <- out <- datetime <- lon_index <- lon_value <- data <- time <- NULL
 
   # Setup extraction
   ncdf <- tidync::tidync(filnam)
@@ -234,13 +248,14 @@ ncfile_to_df <- function(
     # if fgetdate provided, use this function to derive time(s) from nc file name
     if (!is.na(timenam)){
       df <- df |>
-        dplyr::mutate(!!timenam := fgetdate(filnam))
+        dplyr::arrange(datetime) |> # ensure properly ordered
+        dplyr::group_by(lon, lat) |> dplyr::mutate(datetime = fgetdate(filnam)) |> dplyr::ungroup()
     } else {
       warning("Ignored argument 'fgetdate', since no argument 'timenam' provided.")
     }
   }
 
-  # IF NEEDED (i.e. only with tidync version <0.3.0.9002)
+  # IF NEEDED (i.e. only with tidync version prior to 0.3.0.9002)
   if (is.na(fgetdate)){
     if (!is.na(timenam)){# parse integer datetime if timenam provided
 
@@ -257,6 +272,14 @@ ncfile_to_df <- function(
         nc <- ncdf4::nc_open(filnam)
         units    <- nc$dim[[timenam]]$units
         calendar <- nc$dim[[timenam]]$calendar
+        if (length(calendar)==0 || is.null(calendar) || is.na(calendar) ||
+            units == "" ||
+            length(units)==0    || is.null(units)    || is.na(units)) {
+          stop(sprintf(paste0("The following file appears not to have valid timestamps, ",
+                              "please specify the times using argument 'fgetdate':\n",
+                              "%s"),
+                       filnam))
+        }
         ncdf4::nc_close(nc)
 
         df <- df |>
