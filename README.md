@@ -1,5 +1,5 @@
 # map2tidy: Make geospatial data with a time dimension into a tidy format
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13347918.svg)](https://doi.org/10.5281/zenodo.13347918)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13347917.svg)](https://doi.org/10.5281/zenodo.13347917)
 
 ## The problem
 
