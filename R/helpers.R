@@ -247,9 +247,16 @@ ncfile_to_df <- function(
   if (!is.na(fgetdate)){
     # if fgetdate provided, use this function to derive time(s) from nc file name
     if (!is.na(timenam)){
+      dates_to_set <- tryCatch(
+        fgetdate(filnam), # Define a vector of dates based on a single file name
+        error = function(e) stop(sprintf(
+          " Could not derive dates with function `fgetdate` for file:\n   %s\n   Received error: %s",
+          filnam,
+          e))
+      )
       df <- df |>
         dplyr::arrange(datetime) |> # ensure properly ordered
-        dplyr::group_by(lon, lat) |> dplyr::mutate(datetime = fgetdate(filnam)) |> dplyr::ungroup()
+        dplyr::group_by(lon, lat) |> dplyr::mutate(datetime = dates_to_set) |> dplyr::ungroup()
     } else {
       warning("Ignored argument 'fgetdate', since no argument 'timenam' provided.")
     }
