@@ -64,6 +64,8 @@ map2tidy <- function(
   # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
   index <- lat <- lon <- name <- value <- out <- datetime <- lon_index <- lon_value <- data <- time <- NULL
 
+  stopifnot(length(nclist) >= 1)
+
   # check plausibility of argument combination
   if ((ncores > 1 || ncores=="all") && !do_chunks){
     warning("Warning: using multiple cores (ncores > 1) only takes effect when
