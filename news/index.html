@@ -21,7 +21,7 @@
         <a class="external-link hidden-md hidden-lg" href="https://geco-group.org/">
           <img src="https://raw.githubusercontent.com/computationales/GECO_template/main/geco_logo_white_small.png" id="hexlogo" alt="GECO"></a>
         <a class="navbar-brand" href="../index.html">
-           <i>map2tidy <small>v2.0.0</small></i>
+           <i>map2tidy <small>v2.1.0</small></i>
         </a>
       </div>
     </div>
@@ -61,10 +61,32 @@
     </div>
 
     <div class="section level2">
+<h2 class="page-header" data-toc-text="2.1" id="map2tidy-v21">map2tidy v2.1<a class="anchor" aria-label="anchor" href="#map2tidy-v21"></a></h2>
+<ul><li>Changed the naming of the files (prepending 0’s to have always 6 digits: <code>LON_-000.250</code>)</li>
+<li>Added a feature to subset certain longitudes only (argument <code>filter_lon_between_degrees</code>)</li>
+<li>Made error messages more explicit.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="page-header" data-toc-text="2.0" id="map2tidy-v20">map2tidy v2.0<a class="anchor" aria-label="anchor" href="#map2tidy-v20"></a></h2>
 <ul><li>Public release after refactored code</li>
-</ul><p>New sine previous version: * Improve robustness: - <code>map2tidy</code> can now handle hourly data (using pkg <code>CFtime</code>) - generally more automatic handling of NetCDF files. * Streamline API: - function calls require less user input. Since more information is robustly derived from the data itself, the use of various data sets is facilitated. - Namely: get rid of input arguments: <code>timedimnam</code>, <code>noleap</code>, <code>res_time</code> * Improve Verbosity: - <code>map2tidy</code> now reports what it is doing - <code>map2tidy</code> now suggests alternatives if user input is wrong, e.g. typos or wrong names of ‘longituded’ etc… - [ ] unsolved: when <code>ncores &gt; 1</code> verbosity remains low, since <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code> does not get printed from within <code>multidplyr</code></p>
-</div>
+<li>Improved robustness:
+<ul><li>
+<code>map2tidy</code> can now handle hourly data (using pkg <code>CFtime</code>)</li>
+<li>generally more automatic handling of NetCDF files.</li>
+</ul></li>
+<li>Streamlined API:
+<ul><li>function calls require less user input. Since more information is robustly derived from the data itself, the use of various data sets is facilitated.</li>
+<li>Namely: get rid of input arguments: <code>timedimnam</code>, <code>noleap</code>, <code>res_time</code>
+</li>
+</ul></li>
+<li>Improved Verbosity:
+<ul><li>
+<code>map2tidy</code> now reports what it is doing</li>
+<li>
+<code>map2tidy</code> now suggests alternatives if user input is wrong, e.g. typos or wrong names of ‘longituded’ etc…</li>
+<li><label><input type="checkbox">unsolved: when <code>ncores &gt; 1</code> verbosity remains low, since <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code> does not get printed from within <code>multidplyr</code></label></li>
+</ul></li>
+</ul></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

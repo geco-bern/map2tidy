@@ -24,7 +24,7 @@ data."><meta name="twitter:card" content="summary"><!-- Mathjax --><script src="
         <a class="external-link hidden-md hidden-lg" href="https://geco-group.org/">
           <img src="https://raw.githubusercontent.com/computationales/GECO_template/main/geco_logo_white_small.png" id="hexlogo" alt="GECO"></a>
         <a class="navbar-brand" href="../index.html">
-           <i>map2tidy <small>v2.0.0</small></i>
+           <i>map2tidy <small>v2.1.0</small></i>
         </a>
       </div>
     </div>
@@ -83,7 +83,8 @@ data.</p>
 <span>  fileprefix <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  ncores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  fgetdate <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  filter_lon_between_degrees <span class="op">=</span> <span class="cn">NA</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -148,6 +149,12 @@ based on the file name.</p></dd>
 <dd><p>A logical indicating whether time series files are to be
 overwritten.</p></dd>
 
+
+<dt id="arg-filter-lon-between-degrees">filter_lon_between_degrees<a class="anchor" aria-label="anchor" href="#arg-filter-lon-between-degrees"></a></dt>
+<dd><p>Either NA (default) or a vector of two
+numbers c(lower, upper) that define a range of longitude values to process,
+e.g. c(-70, -68).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -156,10 +163,10 @@ and nested column 'data'). Column 'data' contains requested variables
 (probably as doubles) and potentially a column 'datetime' (as string). Note that
 the datetime is defined by package CFtime and can contain dates such
 as "2021-02-30", which are valid for 360-day calendars but not for
-POSIXt. Because of that these dates need to be parsed separately.</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    The <span class="cf">function</span> either returns this tibble or</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="fu">then</span> (<span class="cf">if</span> out_dir is specified) returns nothing and writes the tibble</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    to .rds files <span class="cf">for</span> each longitude value.</span></code></pre><p></p></div>
+POSIXt. Because of that these dates need to be parsed separately.
+The function either returns this tibble or
+then (if out_dir is specified) returns nothing and writes the tibble
+to .rds files for each longitude value.</p>
     </div>
 
   </div>
