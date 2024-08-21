@@ -82,15 +82,15 @@ map2tidy <- function(
   df_indices <- get_longitude_value_indices(nclist[1], lonnam)
   # meta_dims <- tidync::hyper_dims(tidync::tidync(nclist[1]))
   ilon_arg <- if (do_chunks){
-    df_indices # chunking by longitude over multiple cores or single cores
+    df_indices # chunking by longitude into different files
   } else {
-    dplyr::tibble(lon_value="all", lon_index = NA_integer_) # no chunking. read entire files.
+    dplyr::tibble(lon_value="all", lon_index = NA_integer_) # no chunking. store into single file
   }
 
   if (ncores=="all"){
     ncores <- parallel::detectCores() - 1
   }
-  ncores <- min(ncores, nrow(ilon_arg))
+  ncores <- min(ncores, nrow(ilon_arg)) # No need to have more cores if we only produce 1 file
 
   # If needed: create out folder and check access
   if (!is.na(outdir)){
@@ -105,9 +105,13 @@ map2tidy <- function(
   msg2 <- paste0(
     "Extract variable(s): ", paste0(varnam, collapse = ","), ",\n",
     "(in ",
-    ifelse(dplyr::first(is.na(ilon_arg$lon_index)),
+    ifelse(dplyr::first(ilon_arg$lon_value == "all"),
            "1 spatial chunk",
-           sprintf("spatial chunks %d to %d", min(ilon_arg$lon_index), max(ilon_arg$lon_index))),
+           sprintf("%d spatial chunks from %.3f to %.3f degrees in %.3f degree intervals",
+                   nrow(ilon_arg),
+                   min(ilon_arg$lon_value),
+                   max(ilon_arg$lon_value),
+                   diff(ilon_arg$lon_value[1:2]))),
     ifelse(ncores>1,
            sprintf(", distributed over %d workers (i.e CPU cores)", ncores),
            ""),
@@ -144,15 +148,15 @@ map2tidy <- function(
         ncfile_to_df        = ncfile_to_df)
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
-    parition_if_requested <- function(x, cl) {multidplyr::partition(x, cl)}
+    partition_if_requested <- function(x, cl) {multidplyr::partition(x, cl)}
   } else {
     cl <- NULL
-    parition_if_requested <- function(x, cl) {x} # no-effect-placeholder-function
+    partition_if_requested <- function(x, cl) {x} # no-effect-placeholder-function
   }
 
   # Loop over ilon_arg (and within nclist_to_df_byilon loop over nclist)
   res <- ilon_arg |>
-    parition_if_requested(cl) |>
+    partition_if_requested(cl) |>
     dplyr::mutate(
       out = purrr::map(
         as.list(lon_index),

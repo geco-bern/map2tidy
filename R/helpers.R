@@ -103,7 +103,7 @@ nclist_to_df_byilon <- function(
                     lonnam = lonnam,
                     latnam = latnam,
                     timenam = timenam,
-                    fgetdate
+                    fgetdate = fgetdate
       )
     )
 
