@@ -15,7 +15,8 @@ map2tidy(
   fileprefix = NA,
   ncores = 1,
   fgetdate = NA,
-  overwrite = FALSE
+  overwrite = FALSE,
+  filter_lon_between_degrees = NA
 )
 }
 \arguments{
@@ -54,6 +55,10 @@ based on the file name.}
 
 \item{overwrite}{A logical indicating whether time series files are to be
 overwritten.}
+
+\item{filter_lon_between_degrees}{Either NA (default) or a vector of two
+numbers c(lower, upper) that define a range of longitude values to process,
+e.g. c(-70, -68).}
 }
 \value{
 Generates a tibble (containing columns 'lon' (double), 'lat' (double),
