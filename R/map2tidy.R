@@ -40,7 +40,6 @@
 #'         the datetime is defined by package CFtime and can contain dates such
 #'         as "2021-02-30", which are valid for 360-day calendars but not for
 #'         POSIXt. Because of that these dates need to be parsed separately.
-#'
 #'         The function either returns this tibble or
 #'         then (if out_dir is specified) returns nothing and writes the tibble
 #'         to .rds files for each longitude value.
