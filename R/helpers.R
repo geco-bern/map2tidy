@@ -84,9 +84,9 @@ nclist_to_df_byilon <- function(
     df_indices <- get_longitude_value_indices(nclist[1], lonnam)
     lon_values <- ifelse(
       is.na(ilon),
-      sprintf("%+.3f_to_%+.3f",
+      sprintf("%+08.3f_to_%+08.3f",
               min(df_indices$lon_value), max(df_indices$lon_value)),
-      sprintf("%+.3f",   # "%+.3g",
+      sprintf("%+08.3f",   # "%+.3g",
               dplyr::pull(dplyr::filter(df_indices, lon_index == ilon), "lon_value"))
     )
     outpath <- paste0(file.path(outdir, fileprefix), "_LON_", lon_values, ".rds")
@@ -103,7 +103,7 @@ nclist_to_df_byilon <- function(
                     lonnam = lonnam,
                     latnam = latnam,
                     timenam = timenam,
-                    fgetdate
+                    fgetdate = fgetdate
       )
     )
 
@@ -247,9 +247,16 @@ ncfile_to_df <- function(
   if (!is.na(fgetdate)){
     # if fgetdate provided, use this function to derive time(s) from nc file name
     if (!is.na(timenam)){
+      dates_to_set <- tryCatch(
+        fgetdate(filnam), # Define a vector of dates based on a single file name
+        error = function(e) stop(sprintf(
+          " Could not derive dates with function `fgetdate` for file:\n   %s\n   Received error: %s",
+          filnam,
+          e))
+      )
       df <- df |>
         dplyr::arrange(datetime) |> # ensure properly ordered
-        dplyr::group_by(lon, lat) |> dplyr::mutate(datetime = fgetdate(filnam)) |> dplyr::ungroup()
+        dplyr::group_by(lon, lat) |> dplyr::mutate(datetime = dates_to_set) |> dplyr::ungroup()
     } else {
       warning("Ignored argument 'fgetdate', since no argument 'timenam' provided.")
     }

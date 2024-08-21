@@ -15,7 +15,8 @@ map2tidy(
   fileprefix = NA,
   ncores = 1,
   fgetdate = NA,
-  overwrite = FALSE
+  overwrite = FALSE,
+  filter_lon_between_degrees = NA
 )
 }
 \arguments{
@@ -54,6 +55,10 @@ based on the file name.}
 
 \item{overwrite}{A logical indicating whether time series files are to be
 overwritten.}
+
+\item{filter_lon_between_degrees}{Either NA (default) or a vector of two
+numbers c(lower, upper) that define a range of longitude values to process,
+e.g. c(-70, -68).}
 }
 \value{
 Generates a tibble (containing columns 'lon' (double), 'lat' (double),
@@ -62,11 +67,9 @@ and nested column 'data'). Column 'data' contains requested variables
 the datetime is defined by package CFtime and can contain dates such
 as "2021-02-30", which are valid for 360-day calendars but not for
 POSIXt. Because of that these dates need to be parsed separately.
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{    The function either returns this tibble or
-    then (if out_dir is specified) returns nothing and writes the tibble
-    to .rds files for each longitude value.
-}\if{html}{\out{</div>}}
+The function either returns this tibble or
+then (if out_dir is specified) returns nothing and writes the tibble
+to .rds files for each longitude value.
 }
 \description{
 Extracts full time series from a list of NetCDF files, provided for time

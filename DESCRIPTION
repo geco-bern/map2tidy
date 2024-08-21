@@ -1,13 +1,19 @@
 Package: map2tidy
 Title: Map Spatio-temporal NetCDF Stacks Along Time
-Version: 2.0.0
-Authors@R: 
+Version: 2.1.0
+Authors@R: c(
     person(
       given = "Benjamin",
       family = "Stocker",
       email = "benjamin.stocker@gmail.com",
       role = c("aut", "cre"),
-      comment = c(ORCID = "0000-0003-2697-9096")
+      comment = c(ORCID = "0000-0003-2697-9096")),
+    person(
+      given = "Fabian",
+      family = "Bernhard",
+      email = "fabian.bernhard@alumni.epfl.ch",
+      role = c("aut"),
+      comment = c(ORCID = "0000-0003-0338-0961"))
     )
 Description: Make geospatial data with a time dimension into a tidy format. Facilitates temporal analysis on a location basis.
 Depends:

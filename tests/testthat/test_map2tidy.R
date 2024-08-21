@@ -85,8 +85,8 @@ test_that("test map2tidy", {
   )
 
   # Load some example files:
-  df2  <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-0.025_to_+1.425.rds"))
-  df2b3 <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-0.025.rds"))
+  df2  <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-000.025_to_+001.425.rds"))
+  df2b3 <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-000.025.rds"))
 
 
   # check status
