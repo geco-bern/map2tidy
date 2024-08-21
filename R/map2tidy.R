@@ -30,6 +30,9 @@
 #' based on the file name.
 #' @param overwrite A logical indicating whether time series files are to be
 #' overwritten.
+#' @param filter_lon_between_degrees Either NA (default) or a vector of two
+#' numbers c(lower, upper) that define a range of longitude values to process,
+#' e.g. c(-70, -68).
 #'
 #' @importFrom rlang .data
 #' @importFrom utils capture.output
@@ -57,7 +60,8 @@ map2tidy <- function(
   fileprefix = NA,
   ncores     = 1,
   fgetdate   = NA,
-  overwrite  = FALSE
+  overwrite  = FALSE,
+  filter_lon_between_degrees = NA # or c(-70, -68)
   ){
 
   # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
@@ -76,6 +80,10 @@ map2tidy <- function(
       stop("Error: arguments outdir and fileprefix must be specified when do_chunks is TRUE.")
     }
   }
+  stopifnot(!is.numeric(filter_lon_between_degrees) || diff(filter_lon_between_degrees) > 0) # either NA or then c(lower, upper), not c(upper, lower)
+
+
+
 
   # Determine longitude indices for chunks
   # open one file to get longitude information: length of longitude dimension
@@ -86,6 +94,23 @@ map2tidy <- function(
   } else {
     dplyr::tibble(lon_value="all", lon_index = NA_integer_) # no chunking. store into single file
   }
+
+
+  # subset only certain, requested longitude values:
+  if (is.numeric(filter_lon_between_degrees)){
+    if (do_chunks) {
+      ilon_arg <- dplyr::filter(ilon_arg,
+                                dplyr::between(lon_value,
+                                               filter_lon_between_degrees[1],
+                                               filter_lon_between_degrees[2]))
+    } else {
+      stop("Invalid input: if only certain longitude values should be processed (filter_lon_between_degrees), the argument `do_chunks` must be TRUE.")
+      # stop("Invalid input: you can't request to create a single file (do_chunks==FALSE) and also requeste to filter certain longitudes (filter_lon_between_degrees)")
+    }
+  }
+  stopifnot(nrow(ilon_arg) > 0) # check that applying filter_lon_between_degrees still leaves some values to process
+
+
 
   if (ncores=="all"){
     ncores <- parallel::detectCores() - 1
