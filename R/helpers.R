@@ -25,6 +25,33 @@ get_longitude_value_indices <- function(ncdf, lonnam){
   return(res)
 }
 
+#' Checks validity for a given list of NetCDF files
+#'
+#' @param nclist A vector of character strings specifying the complete paths to
+#' files.
+#'
+#' @return NULL if all provided files are valid, otherwise throws an error
+#'         listing all the invalid files.
+check_list_of_ncfiles <- function(nclist){
+  error_list <- purrr::map(
+    structure(.Data = nc_files, .Names = nc_files), # by using named list error messages are more explicit,
+    ~tryCatch({tidync::tidync(.); return(NULL)}, error = function(e) paste0(e)))
+
+  # filter out successfull reads: NULL
+  corrupted_nc_files <- purrr::discard(error_list, is.null)
+
+  if (length(corrupted_nc_files) > 0){
+    err_msg <-
+      data.frame(filename = names(corrupted_nc_files),
+                 error    = unlist(unname(corrupted_nc_files))) |>
+      utils::capture.output()
+    stop("At least one of the input nc files could not be read. Namely:\n",
+         paste0(err_msg, collapse = "\n"))
+  } else {
+    return(NULL)
+  }
+}
+
 #' Returns a tidy data.frame from a list of NetCDF file(s),
 #' optionally subsetting a single a longitudinal band
 #'
@@ -96,7 +123,7 @@ nclist_to_df_byilon <- function(
 
     # get data from all files at given longitude index ilon
     df_list <- purrr::map(
-      as.list(nclist),
+      structure(.Data = nclist, .Names = nclist), # by using named list error messages are more explicit,
       ~ncfile_to_df(.,
                     ilon,
                     varnam = varnam,

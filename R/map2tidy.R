@@ -82,7 +82,8 @@ map2tidy <- function(
   }
   stopifnot(!is.numeric(filter_lon_between_degrees) || diff(filter_lon_between_degrees) > 0) # either NA or then c(lower, upper), not c(upper, lower)
 
-
+  # check validity of NetCDF input files
+  check_list_of_ncfiles(nclist) # errors if some mistakes found, NULL otherwise
 
 
   # Determine longitude indices for chunks
@@ -146,8 +147,8 @@ map2tidy <- function(
     ".\n"
   )
   message(msg2)
-  msg3 <- tidync::tidync(nclist[1]) |> utils::capture.output()
-  msg3 <- gsub("^[ ]*$","", msg3) # Remove strings containing only whitespaces
+  msg3 <- tidync::tidync(nclist[1]) |> utils::capture.output() #TODO(fabern): if filter_lon_between_degrees is provided filter here for msg3...
+  msg3 <- gsub("^[ ]*$","", msg3)  # Remove strings containing only whitespaces
   msg3 <- msg3[nzchar(msg3)]       # Remove empty strings
   message(paste0(msg3, collapse = "\n")) # showing extent of first NetCDF file
 
@@ -181,7 +182,7 @@ map2tidy <- function(
 
   # Loop over ilon_arg (and within nclist_to_df_byilon loop over nclist)
   res <- ilon_arg |>
-    partition_if_requested(cl) |>
+    partition_if_requested(cl) |> # TODO: maybe for chunked files there would be a gain to split by chunksize instead of for each Longitude value, but this might be prohibitively complicated
     dplyr::mutate(
       out = purrr::map(
         as.list(lon_index),
