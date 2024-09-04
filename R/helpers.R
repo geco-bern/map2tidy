@@ -34,7 +34,7 @@ get_longitude_value_indices <- function(ncdf, lonnam){
 #'         listing all the invalid files.
 check_list_of_ncfiles <- function(nclist){
   error_list <- purrr::map(
-    structure(.Data = nc_files, .Names = nc_files), # by using named list error messages are more explicit,
+    structure(.Data = nclist, .Names = nclist), # by using named list error messages are more explicit,
     ~tryCatch({tidync::tidync(.); return(NULL)}, error = function(e) paste0(e)))
 
   # filter out successfull reads: NULL
