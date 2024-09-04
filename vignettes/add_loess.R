@@ -4,9 +4,9 @@ add_loess <- function(df){
 
   # for the example in parallel_computation.Rmd
   df <- df |>
-    dplyr::mutate(year_dec = lubridate::decimal_date(time)) |>
+    mutate(year_dec = lubridate::decimal_date(lubridate::ymd(datetime))) %>%
     dplyr::mutate(loess = stats::loess( et ~ year_dec,
-                                        data = .data,
+                                        data = .,
                                         span = 0.05 )$fitted)
   return(df)
 }

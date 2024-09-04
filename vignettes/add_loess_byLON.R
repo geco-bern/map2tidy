@@ -1,15 +1,12 @@
-add_loess_byilon <- function(ilon){
+add_loess_byLON <- function(LON_str){
   # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
   index <- lat <- lon <- name <- value <- out <- datetime <- lon_value <- data <- time <- NULL
 
   # for the example in parallel_computation.Rmd
-
-  source(paste0(here::here(), "/R/add_loess.R"))
+  source(file.path(here::here(), "vignettes/add_loess.R"))
 
   # read from file that contains tidy data for a single longitudinal band
-  filnam <- list.files(paste0(here::here(), "/data/"),
-                       pattern = paste0("_", as.character(ilon), ".rds"),
-                       full.names = TRUE)
+  filnam <- file.path(tempdir(), paste0("demo_data_2017_", LON_str, ".rds"))
 
   df <- readr::read_rds(filnam)
 
@@ -27,8 +24,5 @@ add_loess_byilon <- function(ilon){
 
   # write (complemented) data to file
   readr::write_rds(df,
-                   paste0(here::here(),
-                          "/data/demo_data_2017_ilon_",
-                          ilon,
-                          "_COMPLEMENTED.rds"))
+                   file.path(tempdir(), paste0("demo_data_2017_", LON_str, "_COMPLEMENTED.rds")))
 }
