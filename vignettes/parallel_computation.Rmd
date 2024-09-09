@@ -97,7 +97,8 @@ add_loess_byLON <- function(LON_str){
   
   # write (complemented) data to file
   readr::write_rds(df, 
-                   file.path(outdir, paste0("demo_data_2017_", LON_str, "_COMPLEMENTED.rds")))
+                   file.path(outdir, paste0("demo_data_2017_", LON_str, "_COMPLEMENTED_xz.rds")),
+                   compress = "xz") # xz seems most efficient
 }
 # # test it:
 # LON <- "LON_+000.125"
