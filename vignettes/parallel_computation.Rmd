@@ -31,8 +31,11 @@ Convert geospatial raster data (e.g., saved as NetCDF, potentially as a list of 
 
 This is demonstrated and explained in the vignette *map2tidy example*. The demo data are raster files of 30 x 30 in latitude and longitude.
 ```{r eval = FALSE}
+library(dplyr)
+library(map2tidy)
 path <- file.path(system.file(package = "map2tidy"),"extdata")
 files <- list.files(path, pattern = "demo_data_2017_month", full.names = TRUE)
+outdir <- tempdir()
 res_tidy <- map2tidy(
   nclist = files, 
   varnam = "et",
@@ -40,7 +43,7 @@ res_tidy <- map2tidy(
   latnam = "lat", 
   timenam = "time", 
   do_chunks = TRUE,
-  outdir = tempdir(), 
+  outdir = outdir, 
   fileprefix = "demo_data_2017", 
   ncores = 3,
   overwrite = TRUE
@@ -62,7 +65,7 @@ add_loess <- function(df){
   return(df)
 }
 # # test it:
-# df <- readRDS(paste0(tempdir(), "/demo_data_2017_LON_+000.125.rds")) |> 
+# df <- readRDS(file.path(outdir, "demo_data_2017_LON_+000.125.rds")) |>
 #   slice(1) |> unnest(data) |> select(datetime, et)
 # add_loess(df)
 ```
@@ -70,15 +73,13 @@ add_loess <- function(df){
 
 ## By longitudinal band
 
-Wrap that function into another function `add_loess_byLON()` that takes the longitude index as its first argument and loops over gridcells within that longitudinal band. The data frame `df` is already nested. Write modified data
+Wrap that function into another function `add_loess_byLON()` that takes the list of longitudes as its first argument and loops over gridcells (i.e. latitude values) within that longitudinal band. The data frame `df` is already nested. Write modified data
 for this longitudinal band to file again. Write this function into a file `R/add_loess_byLON.R`
 ```{r}
 add_loess_byLON <- function(LON_str){
   
-  source(file.path(here::here(), "vignettes/add_loess.R"))
-  
   # read from file that contains tidy data for a single longitudinal band
-  filnam <- file.path(tempdir(), paste0("demo_data_2017_", LON_str, ".rds"))
+  filnam <- file.path(outdir, paste0("demo_data_2017_", LON_str, ".rds"))
   
   df <- readr::read_rds(filnam)
   
@@ -96,12 +97,12 @@ add_loess_byLON <- function(LON_str){
   
   # write (complemented) data to file
   readr::write_rds(df, 
-                   file.path(tempdir(), paste0("demo_data_2017_", LON_str, "_COMPLEMENTED.rds")))
+                   file.path(outdir, paste0("demo_data_2017_", LON_str, "_COMPLEMENTED.rds")))
 }
 # # test it:
 # LON <- "LON_+000.125"
 # add_loess_byLON(LON)
-# readRDS(file.path(tempdir(), "demo_data_2017_LON_+000.125_COMPLEMENTED.rds")) |>
+# readRDS(file.path(outdir, "demo_data_2017_LON_+000.125_COMPLEMENTED.rds")) |>
 #   slice(1) |> unnest(data)
 ```
 
@@ -119,9 +120,6 @@ Such an R script would look like this:
 args = commandArgs(trailingOnly=TRUE)   # to receive arguments from the shell
 
 library(map2tidy)
-
-source(file.path(here::here(), "vignettes/add_loess_byLON.R"))
-
 print("getting data for longitude indices:")
 # list_of_LON_str = c("LON_+046.250", "LON_+046.750")
 list_of_LON_str <- gsub(".*(LON_[0-9.+-]*).*.rds","\\1", res_tidy$data) # extract LONGITUDES from res_tidy
