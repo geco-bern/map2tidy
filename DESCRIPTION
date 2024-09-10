@@ -29,7 +29,6 @@ Imports:
     tidync,
     CFtime,
     readr,
-    lubridate,
     parallel,
     multidplyr,
     utils,
@@ -42,6 +41,7 @@ Suggests:
     testthat,
     knitr,
     ggplot2,
+    lubridate,
     here
 License: AGPL-3
 Encoding: UTF-8
