@@ -1,3 +1,7 @@
+# map2tidy v2.1.1
+
+* activated RDS compression
+
 # map2tidy v2.1
 
 * Changed the naming of the files (prepending 0's to have always 6 digits: `LON_-000.250`)
