@@ -157,7 +157,7 @@ nclist_to_df_byilon <- function(
     if (!is.na(outdir)){
       if (nrow(df) > 0){
         # message(paste("Writing file", outpath, "..."))
-        readr::write_rds(df, file = outpath)
+        readr::write_rds(df, file = outpath, compress = "xz") # xz seems most efficient
         return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
           data = paste0("Written data by worker with jobid: ", Sys.getpid(), " into file: ", outpath)))
       } else {
