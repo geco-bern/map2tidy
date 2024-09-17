@@ -43,7 +43,7 @@
         <a class="external-link hidden-md hidden-lg" href="https://geco-group.org/">
           <img src="https://raw.githubusercontent.com/computationales/GECO_template/main/geco_logo_white_small.png" id="hexlogo" alt="GECO"></a>
         <a class="navbar-brand" href="../index.html">
-           <i>map2tidy <small>v2.1.0.9000</small></i>
+           <i>map2tidy <small>v2.1.1</small></i>
         </a>
       </div>
     </div>
@@ -119,17 +119,23 @@ a list of NetCDF files for multiple time slices) into a tidy data frame.
 To avoid the memory limitation, we write tidy data into multiple files,
 separated by longitudinal bands.</p>
 <p>This is demonstrated and explained in the vignette <em>map2tidy
-functionality</em>. The demo data are raster files of 30 x 30 in
-latitude and longitude.</p>
+example</em>. The demo data are raster files of 30 x 30 in latitude and
+longitude.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/map2tidy.html">map2tidy</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">map2tidy</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org" class="external-link">lubridate</a></span><span class="op">)</span></span>
+<span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"map2tidy"</span><span class="op">)</span>,<span class="st">"extdata"</span><span class="op">)</span></span>
+<span><span class="va">files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">path</span>, pattern <span class="op">=</span> <span class="st">"demo_data_2017_month"</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">outdir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">res_tidy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/map2tidy.html">map2tidy</a></span><span class="op">(</span></span>
 <span>  nclist <span class="op">=</span> <span class="va">files</span>, </span>
 <span>  varnam <span class="op">=</span> <span class="st">"et"</span>,</span>
 <span>  lonnam <span class="op">=</span> <span class="st">"lon"</span>, </span>
 <span>  latnam <span class="op">=</span> <span class="st">"lat"</span>, </span>
 <span>  timenam <span class="op">=</span> <span class="st">"time"</span>, </span>
 <span>  do_chunks <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  outdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span>
+<span>  outdir <span class="op">=</span> <span class="va">outdir</span>, </span>
 <span>  fileprefix <span class="op">=</span> <span class="st">"demo_data_2017"</span>, </span>
 <span>  ncores <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
@@ -150,31 +156,31 @@ its input. Write the function into a file
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">add_loess</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">df</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">|&gt;</span> </span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>year_dec <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/decimal_date.html" class="external-link">decimal_date</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>year_dec <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/decimal_date.html" class="external-link">decimal_date</a></span><span class="op">(</span><span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd.html" class="external-link">ymd</a></span><span class="op">(</span><span class="va">datetime</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>loess <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/loess.html" class="external-link">loess</a></span><span class="op">(</span> <span class="va">et</span> <span class="op">~</span> <span class="va">year_dec</span>,</span>
 <span>                                        data <span class="op">=</span> <span class="va">.</span>, </span>
 <span>                                        span <span class="op">=</span> <span class="fl">0.05</span> <span class="op">)</span><span class="op">$</span><span class="va">fitted</span><span class="op">)</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<span><span class="op">}</span></span>
+<span><span class="co"># # test it:</span></span>
+<span><span class="co"># df &lt;- readRDS(file.path(outdir, "demo_data_2017_LON_+000.125.rds")) |&gt;</span></span>
+<span><span class="co">#   slice(1) |&gt; unnest(data) |&gt; select(datetime, et)</span></span>
+<span><span class="co"># add_loess(df)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="by-longitudinal-band">By longitudinal band<a class="anchor" aria-label="anchor" href="#by-longitudinal-band"></a>
 </h2>
 <p>Wrap that function into another function
-<code>add_loess_byilon()</code> that takes the longitude index as its
-first argument and loops over gridcells within that longitudinal band.
-The data frame <code>df</code> is already nested. Write modified data
-for this longitudinal band to file again. Write this function into a
-file <code>R/add_loess_byilon.R</code></p>
+<code>add_loess_byLON()</code> that takes the list of longitudes as its
+first argument and loops over gridcells (i.e. latitude values) within
+that longitudinal band. The data frame <code>df</code> is already
+nested. Write modified data for this longitudinal band to file again.
+Write this function into a file <code>R/add_loess_byLON.R</code></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">add_loess_byilon</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">ilon</span><span class="op">)</span><span class="op">{</span></span>
-<span>  </span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/R/add_loess.R"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">add_loess_byLON</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">LON_str</span><span class="op">)</span><span class="op">{</span></span>
 <span>  </span>
 <span>  <span class="co"># read from file that contains tidy data for a single longitudinal band</span></span>
-<span>  <span class="va">filnam</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span>
-<span>                       pattern <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">ilon</span><span class="op">)</span>, <span class="st">".rds"</span><span class="op">)</span>,</span>
-<span>                       full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">filnam</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"demo_data_2017_"</span>, <span class="va">LON_str</span>, <span class="st">".rds"</span><span class="op">)</span><span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_rds.html" class="external-link">read_rds</a></span><span class="op">(</span><span class="va">filnam</span><span class="op">)</span></span>
 <span>  </span>
@@ -192,18 +198,21 @@ file <code>R/add_loess_byilon.R</code></p>
 <span>  </span>
 <span>  <span class="co"># write (complemented) data to file</span></span>
 <span>  <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_rds.html" class="external-link">write_rds</a></span><span class="op">(</span><span class="va">df</span>, </span>
-<span>                   <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span>
-<span>                          <span class="st">"/demo_data_2017_ilon_"</span>, </span>
-<span>                          <span class="va">ilon</span>,</span>
-<span>                          <span class="st">"_COMPLEMENTED.rds"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<span>                   <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"demo_data_2017_"</span>, <span class="va">LON_str</span>, <span class="st">"_COMPLEMENTED_xz.rds"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                   compress <span class="op">=</span> <span class="st">"xz"</span><span class="op">)</span> <span class="co"># xz seems most efficient</span></span>
+<span><span class="op">}</span></span>
+<span><span class="co"># # test it:</span></span>
+<span><span class="co"># LON &lt;- "LON_+000.125"</span></span>
+<span><span class="co"># add_loess_byLON(LON)</span></span>
+<span><span class="co"># readRDS(file.path(outdir, "demo_data_2017_LON_+000.125_COMPLEMENTED.rds")) |&gt;</span></span>
+<span><span class="co">#   slice(1) |&gt; unnest(data)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="distribute-jobs">Distribute jobs<a class="anchor" aria-label="anchor" href="#distribute-jobs"></a>
 </h2>
 <p>Write an R script that distributes jobs for parallel computation,
 where each job processes data of one chunk and makes a number of calls
-to <code>add_loess_byilon()</code>. For example, if we have 30
+to <code>add_loess_byLON()</code>. For example, if we have 30
 longitudinal bands and 3 chunks, each chunk makes 10 calls. Write this
 script so that it can be run from the shell and that it can deal with
 three arguments:</p>
@@ -218,43 +227,39 @@ three arguments:</p>
 <span><span class="va">args</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/commandArgs.html" class="external-link">commandArgs</a></span><span class="op">(</span>trailingOnly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>   <span class="co"># to receive arguments from the shell</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">map2tidy</span><span class="op">)</span></span>
-<span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/R/add_loess_byilon.R"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"getting data for longitude indices:"</span><span class="op">)</span></span>
-<span><span class="va">vec_index</span> <span class="op">&lt;-</span> <span class="fu">map2tidy</span><span class="fu">::</span><span class="fu"><a href="../reference/get_index_by_chunk.html">get_index_by_chunk</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, </span>
-<span>                                          <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>, </span>
-<span>                                          <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># list_of_LON_str = c("LON_+046.250", "LON_+046.750")</span></span>
+<span><span class="va">list_of_LON_str</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">".*(LON_[0-9.+-]*).*.rds"</span>,<span class="st">"\\1"</span>, <span class="va">res_tidy</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="co"># extract LONGITUDES from res_tidy</span></span>
 <span></span>
 <span><span class="co"># get all available cores</span></span>
 <span><span class="va">ncores</span> <span class="op">&lt;-</span> <span class="fl">3</span> <span class="co"># parallel::detectCores()</span></span>
 <span></span>
 <span><span class="co"># set up the cluster, sending required objects to each core</span></span>
-<span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu">multidplyr</span><span class="fu">::</span><span class="fu"><a href="https://multidplyr.tidyverse.org/reference/new_cluster.html" class="external-link">new_cluster</a></span><span class="op">(</span><span class="va">ncores</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu">multidplyr</span><span class="fu">::</span><span class="fu"><a href="https://multidplyr.tidyverse.org/reference/new_cluster.html" class="external-link">new_cluster</a></span><span class="op">(</span><span class="va">ncores</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">multidplyr</span><span class="fu">::</span><span class="fu"><a href="https://multidplyr.tidyverse.org/reference/cluster_utils.html" class="external-link">cluster_library</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"map2tidy"</span>,</span>
 <span>                                <span class="st">"dplyr"</span>, </span>
 <span>                                <span class="st">"purrr"</span>, </span>
 <span>                                <span class="st">"tidyr"</span>, </span>
 <span>                                <span class="st">"readr"</span>,</span>
-<span>                                <span class="st">"here"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">multidplyr</span><span class="fu">::</span><span class="fu"><a href="https://multidplyr.tidyverse.org/reference/cluster_utils.html" class="external-link">cluster_assign</a></span><span class="op">(</span>add_loess_byilon <span class="op">=</span> <span class="va">add_loess_byilon</span><span class="op">)</span></span>
+<span>                                <span class="st">"here"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">multidplyr</span><span class="fu">::</span><span class="fu"><a href="https://multidplyr.tidyverse.org/reference/cluster_utils.html" class="external-link">cluster_assign</a></span><span class="op">(</span>add_loess_byLON <span class="op">=</span> <span class="va">add_loess_byLON</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># distribute computation across the cores, calculating for all longitudinal </span></span>
 <span><span class="co"># indices of this chunk</span></span>
-<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>ilon <span class="op">=</span> <span class="va">vec_index</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">multidplyr</span><span class="fu">::</span><span class="fu"><a href="https://multidplyr.tidyverse.org/reference/partition.html" class="external-link">partition</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>out <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span> <span class="va">ilon</span>,</span>
-<span>                                  <span class="op">~</span><span class="fu">add_loess_byilon</span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>LON_str <span class="op">=</span> <span class="va">list_of_LON_str</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="co"># multidplyr::partition(cl) %&gt;%</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>out <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span> <span class="va">LON_str</span>,</span>
+<span>                                  <span class="op">~</span><span class="fu">add_loess_byLON</span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Save the sript as <code>analysis/add_loess_bychunk.R</code>.</p>
 <p>An example shell script to send four jobs on HPC (here: ETH Euler)
 looks like this:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="va">njobs</span><span class="op">=</span>4</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="va">nlon</span><span class="op">=</span>30</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="cf">for</span> <span class="kw">((</span><span class="va">n</span><span class="op">=</span><span class="dv">1</span><span class="kw">;</span><span class="va">n</span><span class="op">&lt;=</span><span class="va">${njobs}</span><span class="kw">;</span><span class="va">n</span><span class="op">++</span><span class="kw">));</span> <span class="cf">do</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">"Submitting chunk number </span><span class="va">$n</span><span class="st"> ..."</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="ex">bsub</span> <span class="at">-W</span> 72:00 <span class="at">-u</span> bestocke <span class="at">-J</span> <span class="st">"job_name </span><span class="va">$n</span><span class="st">"</span> <span class="at">-R</span> <span class="st">"rusage[mem=10000]"</span> <span class="st">"Rscript vanilla analysis/add_loess_bychunk.R </span><span class="va">$n</span><span class="st"> </span><span class="va">$njobs</span><span class="st"> </span><span class="va">$nlon</span><span class="st">"</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co">## #!/bin/bash</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">## njobs=4</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">## nlon=30</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">## for ((n=1;n&lt;=${njobs};n++)); do</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">##     echo "Submitting chunk number $n ..."</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">##     bsub -W 72:00 -u bestocke -J "job_name $n" -R "rusage[mem=10000]" "Rscript vanilla analysis/add_loess_bychunk.R $n $njobs $nlon"</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">## done</span></span></code></pre></div>
 </div>
   </div>
 
