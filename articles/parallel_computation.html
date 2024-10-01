@@ -232,7 +232,7 @@ three arguments:</p>
 <span><span class="va">list_of_LON_str</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">".*(LON_[0-9.+-]*).*.rds"</span>,<span class="st">"\\1"</span>, <span class="va">res_tidy</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="co"># extract LONGITUDES from res_tidy</span></span>
 <span></span>
 <span><span class="co"># get all available cores</span></span>
-<span><span class="va">ncores</span> <span class="op">&lt;-</span> <span class="fl">3</span> <span class="co"># parallel::detectCores()</span></span>
+<span><span class="va">ncores</span> <span class="op">&lt;-</span> <span class="fl">3</span> <span class="co"># length(parallelly::availableWorkers())</span></span>
 <span></span>
 <span><span class="co"># set up the cluster, sending required objects to each core</span></span>
 <span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu">multidplyr</span><span class="fu">::</span><span class="fu"><a href="https://multidplyr.tidyverse.org/reference/new_cluster.html" class="external-link">new_cluster</a></span><span class="op">(</span><span class="va">ncores</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
