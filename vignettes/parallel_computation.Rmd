@@ -127,7 +127,7 @@ print("getting data for longitude indices:")
 list_of_LON_str <- gsub(".*(LON_[0-9.+-]*).*.rds","\\1", res_tidy$data) # extract LONGITUDES from res_tidy
 
 # get all available cores
-ncores <- 3 # parallel::detectCores()
+ncores <- 3 # length(parallelly::availableWorkers())
 
 # set up the cluster, sending required objects to each core
 cl <- multidplyr::new_cluster(ncores) %>%

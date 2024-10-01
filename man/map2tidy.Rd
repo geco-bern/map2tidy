@@ -47,7 +47,7 @@ frames are written using the \code{save} statement. If omitted (defaults to
 
 \item{ncores}{Number of cores for parallel execution (distributing
 extraction of longitude slices). When set to \code{"all"}, the number of
-cores for parallelisation is determined by \code{parallel::detectCores()}.
+cores for parallelisation is determined by \code{length(parallelly::availableWorkers())}.
 Defaults to \code{1} (no parallelisation).}
 
 \item{fgetdate}{A function to derive the date used for the time dimension

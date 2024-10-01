@@ -24,7 +24,7 @@
 #' @param fileprefix A character string specifying the file name prefix.
 #' @param ncores Number of cores for parallel execution (distributing
 #' extraction of longitude slices). When set to \code{"all"}, the number of
-#' cores for parallelisation is determined by \code{parallel::detectCores()}.
+#' cores for parallelisation is determined by \code{length(parallelly::availableWorkers())}.
 #' Defaults to \code{1} (no parallelisation).
 #' @param fgetdate A function to derive the date used for the time dimension
 #' based on the file name.
@@ -114,7 +114,7 @@ map2tidy <- function(
 
 
   if (ncores=="all"){
-    ncores <- parallel::detectCores() - 1
+    ncores <- length(parallelly::availableWorkers()) - 1
   }
   ncores <- min(ncores, nrow(ilon_arg)) # No need to have more cores if we only produce 1 file
 
