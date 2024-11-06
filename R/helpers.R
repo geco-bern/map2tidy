@@ -257,8 +257,8 @@ ncfile_to_df <- function(
   }
   # collect data into tibble
   df <- ncdf |>
-    tidync::hyper_tibble(tidyselect::vars_pull(varnam),
-                         drop=FALSE) |>
+    tidync::hyper_tibble(select_var = varnam, # 'select_var' subsets to requested variable(s)
+                         drop=FALSE) |>       # 'drop=FALSE' keeps the longitude (constant)
     # hardcode colnames: lon and lat as longitude and latitude, and datetime
     # dplyr::rename(lon = !!lonnam, lat = !!latnam) |>
     dplyr::rename(dplyr::any_of(stats::na.omit(c(
