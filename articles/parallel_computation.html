@@ -231,8 +231,7 @@ three arguments:</p>
 <ul>
 <li>an index for the chunk</li>
 <li>the total number of chunks</li>
-<li>the total number of longitudinal bands to treat (optional, if not
-provided treats all available files)</li>
+<li>the total number of longitudinal bands to treat</li>
 </ul>
 <p>Such an R script would look like this:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -242,17 +241,18 @@ provided treats all available files)</li>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">map2tidy</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"../analysis/add_loess.R"</span><span class="op">)</span> <span class="co"># Load the workhorse function</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"../analysis/add_loess.R"</span><span class="op">)</span>          <span class="co"># Load the workhorse function</span></span>
 <span><span class="va">indir</span> <span class="op">&lt;-</span> <span class="st">"../analysis/analysis-output/"</span>    <span class="co"># Define the directory where the processed rds file are</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Running analysis for longitudes:"</span><span class="op">)</span></span>
 <span><span class="va">list_of_files</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">indir</span>, pattern <span class="op">=</span> <span class="st">"demo_data_2017_(LON_[0-9.+-]*).rds"</span><span class="op">)</span></span>
 <span><span class="va">list_of_LON_str</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">".*(LON_[0-9.+-]*).*.rds"</span>,<span class="st">"\\1"</span>, <span class="va">list_of_files</span><span class="op">)</span> <span class="co"># extract LONGITUDES from the list of filenames</span></span>
 <span><span class="va">vec_index</span> <span class="op">&lt;-</span> <span class="fu">map2tidy</span><span class="fu">::</span><span class="fu"><a href="../reference/get_index_by_chunk.html">get_index_by_chunk</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">list_of_files</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="co"># ifelse(is.null(args[3]), length(list_of_files), as.integer(args[3]))) # (optional, if not provided treats all available files)</span></span>
 <span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Running analysis for longitudes:"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">list_of_LON_str</span><span class="op">[</span><span class="va">vec_index</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># get all available cores on each node</span></span>
@@ -273,7 +273,7 @@ provided treats all available files)</li>
 <span><span class="co"># distribute computation across the cores, calculating for all longitudinal</span></span>
 <span><span class="co"># indices of this chunk</span></span>
 <span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>LON_str <span class="op">=</span> <span class="va">list_of_LON_str</span><span class="op">[</span><span class="va">vec_index</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="co"># multidplyr::partition(cl) %&gt;%</span></span>
+<span>  <span class="fu">multidplyr</span><span class="fu">::</span><span class="fu"><a href="https://multidplyr.tidyverse.org/reference/partition.html" class="external-link">partition</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="co"># this distributes across threads/cores</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>out <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span> <span class="va">LON_str</span>,</span>
 <span>                                  <span class="op">~</span><span class="fu">add_loess_byLON</span><span class="op">(</span><span class="va">.</span>, <span class="va">indir</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Save the script as <code>analysis/add_loess_bychunk.R</code>.</p>
@@ -316,12 +316,12 @@ as an array job to four nodes, to be stored as
 <span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co"># </span><span class="al">NOTE</span><span class="co">: If you don't provide a chdir argument to SLURM, need provide to full path from the folder from which executing sbatch.</span></span>
 <span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a></span>
 <span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"Finished on: </span><span class="va">$(</span><span class="fu">date</span> <span class="at">--rfc-3339</span><span class="op">=</span>seconds<span class="va">)</span><span class="st">"</span></span></code></pre></div>
-<pre><code><span><span class="co">## Started on: 2025-02-11 08:52:42+00:00</span></span>
-<span><span class="co">## Hostname: fv-az1912-228</span></span>
+<pre><code><span><span class="co">## Started on: 2025-02-11 09:20:35+00:00</span></span>
+<span><span class="co">## Hostname: fv-az1344-226</span></span>
 <span><span class="co">## Working directory: /home/runner/work/map2tidy/map2tidy/vignettes</span></span>
 <span><span class="co">## sh: 17: module: not found</span></span>
 <span><span class="co">## Fatal error: cannot open file 'add_loess_bychunk.R': No such file or directory</span></span>
-<span><span class="co">## Finished on: 2025-02-11 08:52:42+00:00</span></span></code></pre>
+<span><span class="co">## Finished on: 2025-02-11 09:20:35+00:00</span></span></code></pre>
 </div>
   </div>
 
