@@ -165,7 +165,7 @@ cl <- multidplyr::new_cluster(ncores) %>%
 # distribute computation across the cores, calculating for all longitudinal
 # indices of this chunk
 out <- tibble(LON_str = list_of_LON_str[vec_index]) %>%
-  # multidplyr::partition(cl) %>%
+  multidplyr::partition(cl) %>% # this distributes across threads/cores
   dplyr::mutate(out = purrr::map( LON_str,
                                   ~add_loess_byLON(., indir)))
 
