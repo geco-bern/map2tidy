@@ -124,7 +124,7 @@ Write an R script that distributes jobs for parallel computation, where each job
 
 - an index for the chunk
 - the total number of chunks
-- the total number of longitudinal bands to treat (optional, if not provided treats all available files)
+- the total number of longitudinal bands to treat
 
 Such an R script would look like this:
 ```{r eval=FALSE}
@@ -134,17 +134,18 @@ args = commandArgs(trailingOnly=TRUE)   # to receive arguments from the shell
 library(map2tidy)
 library(dplyr)
 
-source("../analysis/add_loess.R") # Load the workhorse function
+source("../analysis/add_loess.R")          # Load the workhorse function
 indir <- "../analysis/analysis-output/"    # Define the directory where the processed rds file are
 
-print("Running analysis for longitudes:")
 list_of_files   <- list.files(indir, pattern = "demo_data_2017_(LON_[0-9.+-]*).rds")
 list_of_LON_str <- gsub(".*(LON_[0-9.+-]*).*.rds","\\1", list_of_files) # extract LONGITUDES from the list of filenames
 vec_index <- map2tidy::get_index_by_chunk(
   as.integer(args[1]),
   as.integer(args[2]),
-  ifelse(is.null(args[3]), length(list_of_files), as.integer(args[3])))
+  as.integer(args[3]))
+  # ifelse(is.null(args[3]), length(list_of_files), as.integer(args[3]))) # (optional, if not provided treats all available files)
 
+print("Running analysis for longitudes:")
 print(list_of_LON_str[vec_index])
 
 # get all available cores on each node
