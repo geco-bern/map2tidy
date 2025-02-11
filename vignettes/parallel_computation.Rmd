@@ -53,7 +53,7 @@ res_tidy <- map2tidy(
 
 ## Define function
 
-Write the analysis or modelling task as a function, `add_loess()` in the exmple below, that runs with the time series data for a single gridcell as a data frame as its first argument and returns a data frame.
+Write the analysis or modelling task as a function, `add_loess()` in the example below, that runs with the time series data for a single gridcell as a data frame as its first argument and returns a data frame.
  
 This can be anything. Here, we perform a LOESS spline on the time series of the column `et` and add its result as a new column to the data frame. The function requires the time series data frame as its input. Write the function into a file `R/add_loess.R`.
 ```{r}
@@ -74,7 +74,7 @@ add_loess <- function(df){
 
 ## By longitudinal band
 
-Wrap that function into another function `add_loess_byLON()` that takes the list of longitudes as its first argument and loops over gridcells (i.e. latitude values) within that longitudinal band. The data frame `df` is already nested. Write modified data
+Wrap that function into another function `add_loess_byLON()` that takes a list of longitude strings as its first argument and loops over gridcells (i.e. latitude values) within that longitudinal band. The data frame `df` is already nested. Write modified data
 for this longitudinal band to file again. Write this function into a file `R/add_loess_byLON.R`
 ```{r}
 add_loess_byLON <- function(LON_str){
@@ -114,20 +114,27 @@ Write an R script that distributes jobs for parallel computation, where each job
 
 - an index for the chunk
 - the total number of chunks
-- the total number of longitudinal bands
+- the total number of longitudinal bands to treat (optional, if not provided treats all available files)
 
 Such an R script would look like this:
 ```{r eval=FALSE}
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)   # to receive arguments from the shell
-
+                                        # e.g. args <- list(1,4,30)
 library(map2tidy)
 print("getting data for longitude indices:")
 # list_of_LON_str = c("LON_+046.250", "LON_+046.750")
-list_of_LON_str <- gsub(".*(LON_[0-9.+-]*).*.rds","\\1", res_tidy$data) # extract LONGITUDES from res_tidy
+# list_of_LON_str <- gsub(".*(LON_[0-9.+-]*).*.rds","\\1", res_tidy$data) # extract LONGITUDES from res_tidy
+list_of_files   <- list.files(outdir, pattern = "demo_data_2017_(LON_[0-9.+-]*).rds")
+list_of_LON_str <- gsub(".*(LON_[0-9.+-]*).*.rds","\\1", list_of_files) # extract LONGITUDES from the list of filenames
+vec_index <- map2tidy::get_index_by_chunk(
+  as.integer(args[1]), 
+  as.integer(args[2]),
+  ifelse(is.null(args[3]), length(list_of_files), as.integer(args[3])))
 
-# get all available cores
-ncores <- 3 # length(parallelly::availableWorkers())
+# get all available cores on each node
+# ncores <- 3 
+ncores <- length(parallelly::availableWorkers())
 
 # set up the cluster, sending required objects to each core
 cl <- multidplyr::new_cluster(ncores) %>%
@@ -141,7 +148,7 @@ cl <- multidplyr::new_cluster(ncores) %>%
 
 # distribute computation across the cores, calculating for all longitudinal 
 # indices of this chunk
-out <- tibble(LON_str = list_of_LON_str) %>%
+out <- tibble(LON_str = list_of_LON_str[vec_index]) %>%
   # multidplyr::partition(cl) %>%
   dplyr::mutate(out = purrr::map( LON_str,
                                   ~add_loess_byLON(.)))
@@ -157,4 +164,31 @@ An example shell script to send four jobs on HPC (here: ETH Euler) looks like th
 ##     echo "Submitting chunk number $n ..."
 ##     bsub -W 72:00 -u bestocke -J "job_name $n" -R "rusage[mem=10000]" "Rscript vanilla analysis/add_loess_bychunk.R $n $njobs $nlon"
 ## done
+```
+
+And a SLURM batch script for UniBe UBELIX that sends the code to four nodes could look like this:
+```{sh eval - FALSE}
+#! /usr/bin/bash -l
+#SBATCH --job-name="map2tidy distributed"
+#SBATCH --time=20:00:00
+#SBATCH --partition=icpu-stocker # if you have access, this gives you priority
+#SBATCH --array=1-4              # specifies the slurm array job with the number of tasks
+#SBATCH --cpus-per-task=20       # nr of threads, used for shared memory jobs that run locally on a single compute node (default: 1)
+#SBATCH --mail-user=your.email@unibe.ch
+#SBATCH --mail-type=none                                 # when do you want to get notified: none, all, begin, end, fail, requeue, array_tasks
+#SBATCH --chdir=path/to/folder/relative/to/home          # define here the working directory which contains your R-script, and where the output will be written to.
+
+export SBATCH_EXPORT=NONE    # source: https://hpc-unibe-ch.github.io/slurm/submission.html#exportnone
+export SLURM_EXPORT_ENV=ALL  # source: https://hpc-unibe-ch.github.io/slurm/submission.html#exportnone
+
+echo "Started on: $(date --rfc-3339=seconds)"
+echo "Hostname: $(hostname)"
+echo "Working directory: $PWD"   # Is most likely the HOME directory. Allows to check in the log.
+module load R
+
+## Run a small test R script using parallel workers
+##Rscript GitHub/geco-bern/UBELIX_parallelization/02_example_SLURMARRAY.R 1 1 # If you don't provide a chdir argument to SLURM, provide to full path from your HOME folder.
+Rscript analysis/add_loess_bychunk.R $SLURM_ARRAY_TASK_ID $SLURM_ARRAY_TASK_COUNT
+
+echo "Finished on: $(date --rfc-3339=seconds)"
 ```
