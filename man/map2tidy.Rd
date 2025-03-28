@@ -11,6 +11,7 @@ map2tidy(
   latnam = "lat",
   timenam = NA,
   do_chunks = FALSE,
+  na.rm = TRUE,
   outdir = NA,
   fileprefix = NA,
   ncores = 1,
@@ -38,6 +39,10 @@ written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
 arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
 longitudinal bands and the number of chunks corresponds to the number length
 of the longitude dimension.}
+
+\item{na.rm}{A logical indicating whether to remove NA present in the NetCDF
+files.
+Defaults to \code{TRUE}, i.e. removal of NA.}
 
 \item{outdir}{A character string specifying output directory where data
 frames are written using the \code{save} statement. If omitted (defaults to

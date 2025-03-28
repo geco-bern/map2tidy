@@ -14,6 +14,7 @@ nclist_to_df_byilon(
   lonnam,
   latnam,
   timenam,
+  na.rm,
   fgetdate,
   overwrite
 )
@@ -41,6 +42,9 @@ NetCDF files.}
 \item{latnam}{The dimension name of latitude in the NetCDF files.}
 
 \item{timenam}{The name of dimension variable used for time in the NetCDF
+files.}
+
+\item{na.rm}{A logical indicating whether to remove NA present in the NetCDF
 files.}
 
 \item{fgetdate}{A function to derive the date(s) used for the time dimension

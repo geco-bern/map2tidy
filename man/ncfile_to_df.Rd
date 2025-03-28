@@ -5,7 +5,16 @@
 \title{Returns a tidy data.frame from a single NetCDF file,
 optionally subsetting a single longitudinal band}
 \usage{
-ncfile_to_df(filnam, ilon = NA, varnam, lonnam, latnam, timenam, fgetdate)
+ncfile_to_df(
+  filnam,
+  ilon = NA,
+  varnam,
+  lonnam,
+  latnam,
+  timenam,
+  na.rm,
+  fgetdate
+)
 }
 \arguments{
 \item{filnam}{file name}
@@ -23,6 +32,9 @@ NetCDF file.}
 \item{latnam}{The dimension name of latitude in the NetCDF file.}
 
 \item{timenam}{The name of dimension variable used for time in the NetCDF file.}
+
+\item{na.rm}{A logical indicating whether to remove NA present in the NetCDF
+files.}
 
 \item{fgetdate}{A function to derive the date(s) used for the time dimension
 based on the file name.}

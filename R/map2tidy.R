@@ -18,6 +18,9 @@
 #' arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
 #' longitudinal bands and the number of chunks corresponds to the number length
 #' of the longitude dimension.
+#' @param na.rm A logical indicating whether to remove NA present in the NetCDF
+#' files.
+#' Defaults to \code{TRUE}, i.e. removal of NA.
 #' @param outdir A character string specifying output directory where data
 #' frames are written using the \code{save} statement. If omitted (defaults to
 #' \code{NA}), a tidy data frame containing all data is returned.
@@ -56,6 +59,7 @@ map2tidy <- function(
   latnam     = "lat",
   timenam    = NA,
   do_chunks  = FALSE,
+  na.rm      = TRUE,
   outdir     = NA,
   fileprefix = NA,
   ncores     = 1,
@@ -164,10 +168,11 @@ map2tidy <- function(
         nclist              = nclist,
         outdir              = outdir,
         fileprefix          = fileprefix,
-        varnam            = varnam,
+        varnam              = varnam,
         lonnam              = lonnam,
         latnam              = latnam,
         timenam             = timenam,
+        na.rm               = na.rm,
         fgetdate            = fgetdate,
         overwrite           = overwrite,
         nclist_to_df_byilon = nclist_to_df_byilon,
@@ -186,17 +191,18 @@ map2tidy <- function(
     dplyr::mutate(
       out = purrr::map(
         as.list(lon_index),
-        ~map2tidy::nclist_to_df_byilon(
-          nclist,
-          .,
-          outdir,
-          fileprefix,
-          varnam,
-          lonnam,
-          latnam,
-          timenam,
-          fgetdate,
-          overwrite
+        ~nclist_to_df_byilon(
+          nclist     = nclist,
+          ilon       = .,
+          outdir     = outdir,
+          fileprefix = fileprefix,
+          varnam     = varnam,
+          lonnam     = lonnam,
+          latnam     = latnam,
+          timenam    = timenam,
+          na.rm      = na.rm,
+          fgetdate   = fgetdate,
+          overwrite  = overwrite
         ),
         .progress=TRUE)
     )

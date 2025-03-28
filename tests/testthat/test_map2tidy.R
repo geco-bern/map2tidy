@@ -37,6 +37,7 @@ test_that("test map2tidy", {
     lonnam = "lon",
     latnam = "lat",
     timenam = "time",
+    do_chunks = FALSE,
     outdir = tmpdir,
     fileprefix = "demo_data_2017",
     ncores = 1,
@@ -48,6 +49,7 @@ test_that("test map2tidy", {
     lonnam = "lon",
     latnam = "lat",
     timenam = "time",
+    # na.rm = TRUE, # default anyway
     do_chunks = TRUE,
     outdir = tmpdir,
     fileprefix = "demo_data_2017",
@@ -60,6 +62,7 @@ test_that("test map2tidy", {
     lonnam = "lon",
     latnam = "lat",
     timenam = "time",
+    # na.rm = TRUE, # default anyway
     do_chunks = TRUE,
     outdir = tmpdir,
     fileprefix = "demo_data_2017",
@@ -75,6 +78,7 @@ test_that("test map2tidy", {
       lonnam = "lon",
       latnam = "lat",
       timenam = "time",
+      # na.rm = TRUE, # default anyway
       do_chunks = TRUE,
       outdir = tmpdir,
       fileprefix = "demo_data_2017",
@@ -85,8 +89,8 @@ test_that("test map2tidy", {
   )
 
   # Load some example files:
-  df2  <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-000.025_to_+001.425.rds"))
-  df2b3 <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-000.025.rds"))
+  df2  <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-000.025_to_+001.425.rds")) # do_chunks was FALSE
+  df2b3 <- readRDS(file.path(tmpdir, "demo_data_2017_LON_-000.025.rds"))            # do_chunks was TRUE
 
 
   # check status
@@ -116,4 +120,25 @@ test_that("test map2tidy", {
   testthat::expect_length(unique(gsub("into file: .*","",res3$data)), 6) # check that all files are writing by 3 different CPU cores
   #res2c:
   testthat::expect_true(all(grepl("File exists already",res2c$data)))
+
+  # TODO: files have unfortunately no NA, thus df4 is even without
+  #       the filtering identical to df2b3. TODO: Include a small NetCDF data set
+  #       with NA for testing purposes.
+  res4 <- map2tidy( # keep NA, by setting (na.rm = FALSE)
+    nclist = files,
+    varnam = "et",
+    lonnam = "lon",
+    latnam = "lat",
+    timenam = "time",
+    na.rm = FALSE, # change from default=TRUE
+    do_chunks = TRUE,
+    outdir = tmpdir,
+    fileprefix = "demo_data_2017_withNA",
+    ncores = 6,
+    overwrite = TRUE
+  )
+  df4 <- readRDS(file.path(tmpdir, "demo_data_2017_withNA_LON_-000.025.rds"))
+  testthat::expect_equal(
+    df4 |> unnest(data) |> filter(!is.na(et)) |> nest(data = c(et, datetime)),
+    df2b3)
 })

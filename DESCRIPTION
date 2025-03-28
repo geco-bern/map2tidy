@@ -1,6 +1,6 @@
 Package: map2tidy
 Title: Map Spatio-temporal NetCDF Stacks Along Time
-Version: 2.1.2
+Version: 2.1.3
 Authors@R: c(
     person(
       given = "Benjamin",
