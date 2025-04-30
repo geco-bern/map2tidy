@@ -1,3 +1,11 @@
+# map2tidy v2.1.3
+
+* added argument na.rm to map2tidy()
+
+# map2tidy v2.1.2
+
+* internally use pkg {parallelly} instead of {parallel}
+
 # map2tidy v2.1.1
 
 * activated RDS compression

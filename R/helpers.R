@@ -63,6 +63,8 @@ check_list_of_ncfiles <- function(nclist){
 #' @param latnam The dimension name of latitude in the NetCDF files.
 #' @param timenam The name of dimension variable used for time in the NetCDF
 #' files.
+#' @param na.rm A logical indicating whether to remove NA present in the NetCDF
+#' files.
 #' @param outdir A character string specifying output directory where data
 #' frames are written using the \code{save} statement. If omitted (defaults to
 #' \code{NA}), a tidy data frame containing all data is returned.
@@ -99,6 +101,7 @@ nclist_to_df_byilon <- function(
     lonnam,
     latnam,
     timenam,
+    na.rm,
     fgetdate,
     overwrite
 ){
@@ -124,12 +127,13 @@ nclist_to_df_byilon <- function(
     # get data from all files at given longitude index ilon
     df_list <- purrr::map(
       structure(.Data = nclist, .Names = nclist), # by using named list error messages are more explicit,
-      ~ncfile_to_df(.,
-                    ilon,
+      ~ncfile_to_df(filnam = .,
+                    ilon = ilon,
                     varnam = varnam,
                     lonnam = lonnam,
                     latnam = latnam,
                     timenam = timenam,
+                    na.rm = na.rm,
                     fgetdate = fgetdate
       )
     )
@@ -192,6 +196,8 @@ nclist_to_df_byilon <- function(
 #' @param lonnam The dimension name of longitude in the NetCDF file.
 #' @param latnam The dimension name of latitude in the NetCDF file.
 #' @param timenam The name of dimension variable used for time in the NetCDF file.
+#' @param na.rm A logical indicating whether to remove NA present in the NetCDF
+#' files.
 #' @param fgetdate A function to derive the date(s) used for the time dimension
 #' based on the file name.
 #'
@@ -213,6 +219,7 @@ ncfile_to_df <- function(
     lonnam,
     latnam,
     timenam,
+    na.rm,
     fgetdate
 ){
   # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
@@ -258,7 +265,8 @@ ncfile_to_df <- function(
   # collect data into tibble
   df <- ncdf |>
     tidync::hyper_tibble(select_var = varnam, # 'select_var' subsets to requested variable(s)
-                         drop=FALSE) |>       # 'drop=FALSE' keeps the longitude (constant)
+                         drop = FALSE,        # 'drop=FALSE' keeps the longitude (constant)
+                         na.rm = na.rm) |>
     # hardcode colnames: lon and lat as longitude and latitude, and datetime
     # dplyr::rename(lon = !!lonnam, lat = !!latnam) |>
     dplyr::rename(dplyr::any_of(stats::na.omit(c(
