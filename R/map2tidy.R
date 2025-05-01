@@ -14,7 +14,7 @@
 #' @param timenam The name of dimension variable used for time in the NetCDF
 #' files. Defaults to \code{NA}.
 #' @param do_chunks A logical specifying whether chunks of data should be
-#' written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
+#' written to files. Defaults to \code{TRUE}. If set to \code{TRUE}, the
 #' arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
 #' longitudinal bands and the number of chunks corresponds to the number length
 #' of the longitude dimension.
@@ -58,7 +58,7 @@ map2tidy <- function(
   lonnam     = "lon",
   latnam     = "lat",
   timenam    = NA,
-  do_chunks  = FALSE,
+  do_chunks  = TRUE,
   na.rm      = TRUE,
   outdir     = NA,
   fileprefix = NA,
@@ -89,17 +89,16 @@ map2tidy <- function(
   # check validity of NetCDF input files
   check_list_of_ncfiles(nclist) # errors if some mistakes found, NULL otherwise
 
-
   # Determine longitude indices for chunks
   # open one file to get longitude information: length of longitude dimension
   df_indices <- get_longitude_value_indices(nclist[1], lonnam)
+
   # meta_dims <- tidync::hyper_dims(tidync::tidync(nclist[1]))
   ilon_arg <- if (do_chunks){
     df_indices # chunking by longitude into different files
   } else {
     dplyr::tibble(lon_value="all", lon_index = NA_integer_) # no chunking. store into single file
   }
-
 
   # subset only certain, requested longitude values:
   if (is.numeric(filter_lon_between_degrees)){
@@ -114,8 +113,6 @@ map2tidy <- function(
     }
   }
   stopifnot(nrow(ilon_arg) > 0) # check that applying filter_lon_between_degrees still leaves some values to process
-
-
 
   if (ncores=="all"){
     ncores <- length(parallelly::availableWorkers()) - 1
@@ -156,7 +153,6 @@ map2tidy <- function(
   msg3 <- msg3[nzchar(msg3)]       # Remove empty strings
   message(paste0(msg3, collapse = "\n")) # showing extent of first NetCDF file
 
-
   # collect time series per longitude slice and create separate files per longitude slice.
 
   # Setup cluster if requested, otherwise use no-effect-placeholder-function
@@ -166,6 +162,7 @@ map2tidy <- function(
       multidplyr::cluster_library(c("dplyr", "purrr", "tidyr", "tidync")) |>
       multidplyr::cluster_assign(
         nclist              = nclist,
+        df_indices          = df_indices,
         outdir              = outdir,
         fileprefix          = fileprefix,
         varnam              = varnam,
@@ -176,13 +173,17 @@ map2tidy <- function(
         fgetdate            = fgetdate,
         overwrite           = overwrite,
         nclist_to_df_byilon = nclist_to_df_byilon,
-        ncfile_to_df        = ncfile_to_df)
+        ncfile_to_df        = ncfile_to_df
+        )
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
-    partition_if_requested <- function(x, cl) {multidplyr::partition(x, cl)}
+    partition_if_requested <- function(x, cl){
+      multidplyr::partition(x, cl)
+      }
+
   } else {
     cl <- NULL
-    partition_if_requested <- function(x, cl) {x} # no-effect-placeholder-function
+    partition_if_requested <- function(x, cl){x} # no-effect-placeholder-function
   }
 
   # Loop over ilon_arg (and within nclist_to_df_byilon loop over nclist)
@@ -194,6 +195,7 @@ map2tidy <- function(
         ~nclist_to_df_byilon(
           nclist     = nclist,
           ilon       = .,
+          df_indices = df_indices,
           outdir     = outdir,
           fileprefix = fileprefix,
           varnam     = varnam,

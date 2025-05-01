@@ -73,6 +73,8 @@ check_list_of_ncfiles <- function(nclist){
 #' If provided, only longitude index 'ilon' is extracted. If omitted
 #' (\code{ilon = NA}), the function returns tidy data for all longitude
 #' indexes.
+#' @param df_indices A data frame with columns \code{lon_value} and
+#' \code{lon_index} for identifying longitude index added to file name.
 #' @param fgetdate A function to derive the date(s) used for the time dimension
 #' based on the file name.
 #' @param overwrite A logical indicating whether time series files are to be
@@ -95,6 +97,7 @@ check_list_of_ncfiles <- function(nclist){
 nclist_to_df_byilon <- function(
     nclist,
     ilon,
+    df_indices,
     outdir,
     fileprefix,
     varnam,
@@ -111,7 +114,6 @@ nclist_to_df_byilon <- function(
 
   # create file name
   if (!is.na(outdir)){
-    df_indices <- get_longitude_value_indices(nclist[1], lonnam)
     lon_values <- ifelse(
       is.na(ilon),
       sprintf("%+08.3f_to_%+08.3f",
@@ -165,7 +167,7 @@ nclist_to_df_byilon <- function(
         return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
           data = paste0("Written data by worker with jobid: ", Sys.getpid(), " into file: ", outpath)))
       } else {
-        warning(paste("Omitting file", outpath, "..."))
+        message(paste("Omitting file", outpath, "..."))
         return(dplyr::filter(df_indices, lon_index == ilon) |>
                  dplyr::select(lon=lon_value) |> dplyr::mutate(
           data = paste0("No data read in, and hence omitted writing out file: ", outpath)))
@@ -175,7 +177,7 @@ nclist_to_df_byilon <- function(
     }
 
   } else {
-    warning(paste0("File exists already: ", outpath))
+    message(paste0("File exists already: ", outpath))
     # return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
     #   data = paste0("File exists already: ", outpath)))  # NOTE: can't output lon value if we don't read the NCfile
     return(data.frame(lon=NA, data=paste0("File exists already: ", outpath)))
@@ -228,25 +230,26 @@ ncfile_to_df <- function(
   # Setup extraction
   ncdf <- tidync::tidync(filnam)
 
-  # check if requested dimensions and variables exist
-  ncdf_available_dims <- tidync::hyper_dims(ncdf)
-  ncdf_available_vars <- tidync::hyper_vars(ncdf)
-  err_msg_lon <- sprintf(
-    "For file %s:\n  Provided name of longitudinal dimension as '%s', which is not among available dims: %s",
-    filnam, lonnam, paste0(ncdf_available_dims$name, collapse = ","))
-  err_msg_lat <- sprintf(
-    "For file %s:\n  Provided name of latitudinal dimension as '%s', which is not among available dims: %s",
-    filnam, latnam, paste0(ncdf_available_dims$name, collapse = ","))
-  err_msg_time <- sprintf(
-    "For file %s:\n  Provided name of time dimension as '%s', which is not among available dims: %s",
-    filnam, timenam, paste0(ncdf_available_dims$name, collapse = ","))
-  lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
-  latnam %in% ncdf_available_dims$name || stop(err_msg_lat)
-  timenam%in% ncdf_available_dims$name || is.na(timenam) || stop(err_msg_time)
-  err_msg_var <- sprintf(
-    "For file %s:\n  Requested variable(s) '%s', which are not all among available variables: %s",
-    filnam, paste0(varnam, collapse = ","), paste0(ncdf_available_vars$name, collapse = ","))
-  all(varnam %in% ncdf_available_vars$name) || stop(err_msg_var)
+  # Beni 1.5.25: commented to speed up
+  # # check if requested dimensions and variables exist
+  # ncdf_available_dims <- tidync::hyper_dims(ncdf)
+  # ncdf_available_vars <- tidync::hyper_vars(ncdf)
+  # err_msg_lon <- sprintf(
+  #   "For file %s:\n  Provided name of longitudinal dimension as '%s', which is not among available dims: %s",
+  #   filnam, lonnam, paste0(ncdf_available_dims$name, collapse = ","))
+  # err_msg_lat <- sprintf(
+  #   "For file %s:\n  Provided name of latitudinal dimension as '%s', which is not among available dims: %s",
+  #   filnam, latnam, paste0(ncdf_available_dims$name, collapse = ","))
+  # err_msg_time <- sprintf(
+  #   "For file %s:\n  Provided name of time dimension as '%s', which is not among available dims: %s",
+  #   filnam, timenam, paste0(ncdf_available_dims$name, collapse = ","))
+  # lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
+  # latnam %in% ncdf_available_dims$name || stop(err_msg_lat)
+  # timenam%in% ncdf_available_dims$name || is.na(timenam) || stop(err_msg_time)
+  # err_msg_var <- sprintf(
+  #   "For file %s:\n  Requested variable(s) '%s', which are not all among available variables: %s",
+  #   filnam, paste0(varnam, collapse = ","), paste0(ncdf_available_vars$name, collapse = ","))
+  # all(varnam %in% ncdf_available_vars$name) || stop(err_msg_var)
 
   # get data
   if (is.na(ilon)){
@@ -289,9 +292,12 @@ ncfile_to_df <- function(
           filnam,
           e))
       )
+
       df <- df |>
         dplyr::arrange(datetime) |> # ensure properly ordered
-        dplyr::group_by(lon, lat) |> dplyr::mutate(datetime = dates_to_set) |> dplyr::ungroup()
+        dplyr::group_by(lon, lat) |>
+        dplyr::mutate(datetime = dates_to_set) |>
+        dplyr::ungroup()
     } else {
       warning("Ignored argument 'fgetdate', since no argument 'timenam' provided.")
     }
