@@ -8,6 +8,7 @@ optionally subsetting a single a longitudinal band}
 nclist_to_df_byilon(
   nclist,
   ilon,
+  df_indices,
   outdir,
   fileprefix,
   varnam,
@@ -27,6 +28,9 @@ files.}
 If provided, only longitude index 'ilon' is extracted. If omitted
 (\code{ilon = NA}), the function returns tidy data for all longitude
 indexes.}
+
+\item{df_indices}{A data frame with columns \code{lon_value} and
+\code{lon_index} for identifying longitude index added to file name.}
 
 \item{outdir}{A character string specifying output directory where data
 frames are written using the \code{save} statement. If omitted (defaults to

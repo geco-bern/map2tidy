@@ -91,10 +91,10 @@ map2tidy <- function(
 
   # Determine longitude indices for chunks
   # open one file to get longitude information: length of longitude dimension
-  df_indices <- get_longitude_value_indices(nclist[1], lonnam)
+  df_indices <- get_df_lon_index(nclist[1], lonnam)
 
   # meta_dims <- tidync::hyper_dims(tidync::tidync(nclist[1]))
-  ilon_arg <- if (do_chunks){
+  df_ilon_arg <- if (do_chunks){
     df_indices # chunking by longitude into different files
   } else {
     dplyr::tibble(lon_value="all", lon_index = NA_integer_) # no chunking. store into single file
@@ -103,7 +103,7 @@ map2tidy <- function(
   # subset only certain, requested longitude values:
   if (is.numeric(filter_lon_between_degrees)){
     if (do_chunks) {
-      ilon_arg <- dplyr::filter(ilon_arg,
+      df_ilon_arg <- dplyr::filter(df_ilon_arg,
                                 dplyr::between(lon_value,
                                                filter_lon_between_degrees[1],
                                                filter_lon_between_degrees[2]))
@@ -112,12 +112,12 @@ map2tidy <- function(
       # stop("Invalid input: you can't request to create a single file (do_chunks==FALSE) and also requeste to filter certain longitudes (filter_lon_between_degrees)")
     }
   }
-  stopifnot(nrow(ilon_arg) > 0) # check that applying filter_lon_between_degrees still leaves some values to process
+  stopifnot(nrow(df_ilon_arg) > 0) # check that applying filter_lon_between_degrees still leaves some values to process
 
   if (ncores=="all"){
     ncores <- length(parallelly::availableWorkers()) - 1
   }
-  ncores <- min(ncores, nrow(ilon_arg)) # No need to have more cores if we only produce 1 file
+  ncores <- min(ncores, nrow(df_ilon_arg)) # No need to have more cores if we only produce 1 file
 
   # If needed: create out folder and check access
   if (!is.na(outdir)){
@@ -132,13 +132,13 @@ map2tidy <- function(
   msg2 <- paste0(
     "Extract variable(s): ", paste0(varnam, collapse = ","), ",\n",
     "(in ",
-    ifelse(dplyr::first(ilon_arg$lon_value == "all"),
+    ifelse(dplyr::first(df_ilon_arg$lon_value == "all"),
            "1 spatial chunk",
            sprintf("%d spatial chunks from %.3f to %.3f degrees in %.3f degree intervals",
-                   nrow(ilon_arg),
-                   min(ilon_arg$lon_value),
-                   max(ilon_arg$lon_value),
-                   diff(ilon_arg$lon_value[1:2]))),
+                   nrow(df_ilon_arg),
+                   min(df_ilon_arg$lon_value),
+                   max(df_ilon_arg$lon_value),
+                   diff(df_ilon_arg$lon_value[1:2]))),
     ifelse(ncores>1,
            sprintf(", distributed over %d workers (i.e CPU cores)", ncores),
            ""),
@@ -186,12 +186,12 @@ map2tidy <- function(
     partition_if_requested <- function(x, cl){x} # no-effect-placeholder-function
   }
 
-  # Loop over ilon_arg (and within nclist_to_df_byilon loop over nclist)
-  res <- ilon_arg |>
+  # Loop over df_ilon_arg (and within nclist_to_df_byilon loop over nclist)
+  res <- df_ilon_arg |>
     partition_if_requested(cl) |> # TODO: maybe for chunked files there would be a gain to split by chunksize instead of for each Longitude value, but this might be prohibitively complicated
     dplyr::mutate(
       out = purrr::map(
-        as.list(lon_index),
+        lon_index,
         ~nclist_to_df_byilon(
           nclist     = nclist,
           ilon       = .,

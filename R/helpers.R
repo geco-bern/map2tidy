@@ -1,13 +1,93 @@
+
+#' Creates a string used for file suffix of longitudinal bands
+#'
+#' @param ilon A longitude index
+#' @param df_lon_index A data frame identifying the longitude value for all
+#' indices, returned by function \code{get_df_lon_index}.
+#'
+#' @return A character string
+#' @export
+
+get_file_suffix <- function(ilon, df_lon_index){
+
+  char <- ifelse(
+    is.na(ilon),
+    sprintf("%+08.3f_to_%+08.3f",
+            min(df_lon_index$lon_value), max(df_lon_index$lon_value)),
+    sprintf("%+08.3f",
+            dplyr::pull(dplyr::filter(df_lon_index, lon_index == ilon), lon_value))
+  )
+  char <- paste0("_LON_", char)
+
+  return(char)
+}
+
+#' Returns a data.frame defining longitude value and longitude index for a given
+#' NetCDF file
+#'
+#' @param x Either a character string specifying the complete path to a
+#' NetCDF file, or an object of class \code{tidync::tidync}, or a list returned
+#' by \code{get_grid} (containing named elements \code{lon_start},
+#' \code{dlon}, \code{len_ilon},  \code{lat_start}, \code{dlat}, and
+#' \code{len_ilat}).
+#' @param lonnam The dimension name of longitude in the NetCDF files.
+#'
+#' @return Tidy tibble containing longidude indices and values of the given file.
+#' @export
+
+get_df_lon_index <- function(x, lonnam){
+
+  if (is.list(x) && all(c("lon_start", "dlon", "len_ilon", "lat_start", "dlat", "len_ilat") %in% names(x))){
+    # is a list specifying the grid
+    df_lon_index <- tibble(
+      lon_index = seq(x$len_ilon),
+      lon_value = seq(from = x$lon_start, by = x$dlon, length.out = x$len_ilon)
+    )
+
+  } else {
+
+    if (is.character(x) && !(methods::is(x, "tidync"))){
+      # read file as tidync
+      x <- tidync::tidync(x)
+    }
+
+    if (methods::is(x, "tidync")){
+      # check if requested longitude dimension exists
+      ncdf_available_dims <- tidync::hyper_dims(x)
+
+      if (!(lonnam %in% ncdf_available_dims$name)){
+        err_msg_lon <- sprintf(
+          "For file %s:\n  Provided name of longitudinal dimension as '%s', which is not among available dims: %s",
+          x$source$source, lonnam, paste0(ncdf_available_dims$name, collapse = ",")
+        )
+        stop(err_msg_lon)
+      }
+
+      df_lon_index <- x$transforms[[lonnam]] |>
+        dplyr::select(lon_index = index, lon_value = lon)
+
+    }
+  }
+
+  return(df_lon_index)
+}
+
 #' Returns a data.frame defining longitude value and longitude index for a given
 #' NetCDF file
 #'
 #' @param ncdf Either a character string specifying the complete path to a
-#' NetCDF file, or an object of class \code{tidync::tidync}.
+#' NetCDF file, or an object of class \code{tidync::tidync}, or a list returned
+#' by \code{get_grid}.
 #' @param lonnam The dimension name of longitude in the NetCDF files.
+#' @param latnam The dimension name of latitude in the NetCDF files.
 #'
-#' @return Tidy tibble containing the variables 'varnam'.
+#' @return A list specifying the grid. Contains elements \code{lon_start},
+#' \code{dlon}, \code{len_ilon},  \code{lat_start}, \code{dlat}, and
+#' \code{len_ilat}.
+#' @export
 
-get_longitude_value_indices <- function(ncdf, lonnam){
+get_grid <- function(ncdf, lonnam, latnam){
+
   if (methods::is(ncdf, "tidync")) {
   } else {
     ncdf <- tidync::tidync(ncdf)
@@ -15,14 +95,39 @@ get_longitude_value_indices <- function(ncdf, lonnam){
 
   # check if requested longitude dimension exists
   ncdf_available_dims <- tidync::hyper_dims(ncdf)
-  err_msg_lon <- sprintf(
-    "For file %s:\n  Provided name of longitudinal dimension as '%s', which is not among available dims: %s",
-    ncdf$source$source, lonnam, paste0(ncdf_available_dims$name, collapse = ","))
-  lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
 
-  res <- ncdf$transforms[[lonnam]][, c(lonnam, "index")]
-  res <- dplyr::rename(res, dplyr::all_of(c(lon_value=lonnam, lon_index="index")))
-  return(res)
+  # check if longitude and latitude name is among available dimensionnames
+  if (!(lonnam %in% ncdf_available_dims$name)){
+    err_msg_lon <- sprintf(
+      "For file %s:\n  Provided name of longitude dimension name as '%s', which is not among available dims: %s",
+      ncdf$source$source, lonnam, paste0(ncdf_available_dims$name, collapse = ",")
+    )
+    stop(err_msg_lon)
+  }
+  if (!(latnam %in% ncdf_available_dims$name)){
+    err_msg_lat <- sprintf(
+      "For file %s:\n  Provided name of latitude dimension name as '%s', which is not among available dims: %s",
+      ncdf$source$source, latnam, paste0(ncdf_available_dims$name, collapse = ",")
+    )
+    stop(err_msg_lat)
+  }
+
+  lon_vec <- ncdf$transforms[[lonnam]] |>
+    pull(lon)
+
+  lat_vec <- ncdf$transforms[[latnam]] |>
+    pull(lat)
+
+  grid <- list(
+    lon_start = min(lon_vec),
+    dlon = diff(lon_vec)[1],
+    len_ilon = length(lon_vec),
+    lat_start = min(lat_vec),
+    dlat = diff(lat_vec)[1],
+    len_ilat = length(lat_vec)
+  )
+
+  return(grid)
 }
 
 #' Checks validity for a given list of NetCDF files
@@ -112,16 +217,11 @@ nclist_to_df_byilon <- function(
   # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
   index <- lat <- lon <- name <- value <- out <- datetime <- lon_index <- lon_value <- data <- time <- NULL
 
+  suffix <- get_file_suffix(ilon, df_indices)
+
   # create file name
   if (!is.na(outdir)){
-    lon_values <- ifelse(
-      is.na(ilon),
-      sprintf("%+08.3f_to_%+08.3f",
-              min(df_indices$lon_value), max(df_indices$lon_value)),
-      sprintf("%+08.3f",   # "%+.3g",
-              dplyr::pull(dplyr::filter(df_indices, lon_index == ilon), "lon_value"))
-    )
-    outpath <- paste0(file.path(outdir, fileprefix), "_LON_", lon_values, ".rds")
+    outpath <- paste0(file.path(outdir, fileprefix), suffix, ".rds")
   }
 
   if (is.na(outdir) || !file.exists(outpath) || overwrite){

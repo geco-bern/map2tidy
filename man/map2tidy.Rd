@@ -10,7 +10,7 @@ map2tidy(
   lonnam = "lon",
   latnam = "lat",
   timenam = NA,
-  do_chunks = FALSE,
+  do_chunks = TRUE,
   na.rm = TRUE,
   outdir = NA,
   fileprefix = NA,
@@ -35,7 +35,7 @@ NetCDF files.}
 files. Defaults to \code{NA}.}
 
 \item{do_chunks}{A logical specifying whether chunks of data should be
-written to files. Defaults to \code{FALSE}. If set to \code{TRUE}, the
+written to files. Defaults to \code{TRUE}. If set to \code{TRUE}, the
 arguments \code{outdir} and \code{fileprefix} must be specified. Chunks are
 longitudinal bands and the number of chunks corresponds to the number length
 of the longitude dimension.}
