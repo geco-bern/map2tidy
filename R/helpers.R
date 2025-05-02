@@ -227,16 +227,17 @@ nclist_to_df_byilon <- function(
   if (is.na(outdir) || !file.exists(outpath) || overwrite){
 
     # get data from all files at given longitude index ilon
+    # reverted to beni old
     df_list <- purrr::map(
-      structure(.Data = nclist, .Names = nclist), # by using named list error messages are more explicit,
-      ~ncfile_to_df(filnam = .,
-                    ilon = ilon,
-                    varnam = varnam,
-                    lonnam = lonnam,
-                    latnam = latnam,
-                    timenam = timenam,
-                    na.rm = na.rm,
-                    fgetdate = fgetdate
+      as.list(nclist),
+      ~nclist_to_df_byfil(filnam =.,
+                          ilon = ilon,
+                          varnam = varnam,
+                          lonnam = lonnam,
+                          latnam = latnam,
+                          timenam = timenam,
+                          na.rm = na.rm,
+                          fgetdate = fgetdate
       )
     )
 
@@ -261,17 +262,10 @@ nclist_to_df_byilon <- function(
     }
 
     if (!is.na(outdir)){
-      if (nrow(df) > 0){
-        # message(paste("Writing file", outpath, "..."))
-        readr::write_rds(df, file = outpath, compress = "xz") # xz seems most efficient
-        return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
-          data = paste0("Written data by worker with jobid: ", Sys.getpid(), " into file: ", outpath)))
-      } else {
-        message(paste("Omitting file", outpath, "..."))
-        return(dplyr::filter(df_indices, lon_index == ilon) |>
-                 dplyr::select(lon=lon_value) |> dplyr::mutate(
-          data = paste0("No data read in, and hence omitted writing out file: ", outpath)))
-      }
+      readr::write_rds(df, file = outpath, compress = "xz") # xz seems most efficient
+      return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
+        data = paste0("Written data by worker with jobid: ", Sys.getpid(), " into file: ", outpath)))
+
     } else {
       return(df)
     }
@@ -314,7 +308,7 @@ nclist_to_df_byilon <- function(
 #'         parsed separately.
 #' @export
 
-ncfile_to_df <- function(
+nclist_to_df_byfil <- function(
     filnam,
     ilon = NA,
     varnam,
@@ -365,6 +359,7 @@ ncfile_to_df <- function(
       stop(sprintf("Received lonnam argument: '%s'. Currently only 'lon' or 'longitude' are supported by map2tidy. Your case needs to be added.", lonnam))
     }
   }
+
   # collect data into tibble
   df <- ncdf |>
     tidync::hyper_tibble(select_var = varnam, # 'select_var' subsets to requested variable(s)
