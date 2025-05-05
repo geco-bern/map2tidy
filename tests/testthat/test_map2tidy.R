@@ -2,7 +2,7 @@
 path <- file.path(system.file(package = "map2tidy"),"extdata")
 
 # list demo files
-files <- list.files(path, pattern = "demo_data_2017_month", full.names = TRUE)
+files <- list.files(path, pattern = "demo_data_2017_month.*.nc", full.names = TRUE)
 
 #---- test functions ----
 test_that("test map2tidy", {
@@ -15,6 +15,7 @@ test_that("test map2tidy", {
     latnam = "lat",
     timenam = "time",
   )
+
   # check status
   #df1:
   testthat::expect_type(df1, "list")
@@ -31,6 +32,7 @@ test_that("test map2tidy", {
 
   tmpdir <- tempdir()
 
+  # writing files
   res2 <- map2tidy(
     nclist = files,
     varnam = "et",
@@ -43,6 +45,8 @@ test_that("test map2tidy", {
     ncores = 1,
     overwrite = TRUE
   )
+
+  # writing files, not parallel
   res2b <- map2tidy(
     nclist = files,
     varnam = "et",
@@ -56,6 +60,8 @@ test_that("test map2tidy", {
     ncores = 1,
     overwrite = TRUE
   )
+
+  # writing files, parallel
   res3 <- map2tidy( # do overwrite
     nclist = files,
     varnam = "et",
@@ -70,8 +76,8 @@ test_that("test map2tidy", {
     overwrite = TRUE
   )
 
-
-  testthat::expect_warning(
+  # test whether overwriting is avoided
+  testthat::expect_message(
     res2c <- map2tidy(  # do not overwrite
       nclist = files,
       varnam = "et",
