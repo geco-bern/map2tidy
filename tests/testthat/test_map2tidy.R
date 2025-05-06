@@ -11,6 +11,7 @@ test_that("test map2tidy", {
   df1 <- map2tidy(
     nclist = files,
     varnam = "et",
+    do_chunks = FALSE,
     lonnam = "lon",
     latnam = "lat",
     timenam = "time",
@@ -71,7 +72,7 @@ test_that("test map2tidy", {
   )
 
 
-  testthat::expect_warning(
+  testthat::expect_message(
     res2c <- map2tidy(  # do not overwrite
       nclist = files,
       varnam = "et",

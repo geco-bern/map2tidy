@@ -173,7 +173,8 @@ map2tidy <- function(
         fgetdate            = fgetdate,
         overwrite           = overwrite,
         nclist_to_df_byilon = nclist_to_df_byilon,
-        ncfile_to_df        = ncfile_to_df
+        nclist_to_df_byfil  = nclist_to_df_byfil,
+        get_file_suffix     = get_file_suffix
         )
 
     # distribute to cores, making sure all data from a specific site is sent to the same core
