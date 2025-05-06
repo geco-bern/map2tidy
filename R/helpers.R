@@ -10,6 +10,9 @@
 
 get_file_suffix <- function(ilon, df_lon_index){
 
+  # R CMD Check HACK, use .data$ syntax (or {{...}}) for correct fix https://stackoverflow.com/a/63877974
+  lon_index <- lon_value <- NULL
+
   char <- ifelse(
     is.na(ilon),
     sprintf("%+08.3f_to_%+08.3f",
@@ -39,7 +42,7 @@ get_df_lon_index <- function(x, lonnam){
 
   if (is.list(x) && all(c("lon_start", "dlon", "len_ilon", "lat_start", "dlat", "len_ilat") %in% names(x))){
     # is a list specifying the grid
-    df_lon_index <- tibble(
+    df_lon_index <- tidyr::tibble(
       lon_index = seq(x$len_ilon),
       lon_value = seq(from = x$lon_start, by = x$dlon, length.out = x$len_ilon)
     )
@@ -64,7 +67,7 @@ get_df_lon_index <- function(x, lonnam){
       }
 
       df_lon_index <- x$transforms[[lonnam]] |>
-        dplyr::select(lon_index = index, lon_value = lon)
+        dplyr::select(lon_index = 'index', lon_value = 'lon')
 
     }
   }
@@ -113,10 +116,10 @@ get_grid <- function(ncdf, lonnam, latnam){
   }
 
   lon_vec <- ncdf$transforms[[lonnam]] |>
-    pull(lon)
+    dplyr::pull('lon')
 
   lat_vec <- ncdf$transforms[[latnam]] |>
-    pull(lat)
+    dplyr::pull('lat')
 
   grid <- list(
     lon_start = min(lon_vec),
@@ -137,6 +140,7 @@ get_grid <- function(ncdf, lonnam, latnam){
 #'
 #' @return NULL if all provided files are valid, otherwise throws an error
 #'         listing all the invalid files.
+
 check_list_of_ncfiles <- function(nclist){
   error_list <- purrr::map(
     structure(.Data = nclist, .Names = nclist), # by using named list error messages are more explicit,
