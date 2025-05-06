@@ -10,7 +10,7 @@ map2tidy(
   lonnam = "lon",
   latnam = "lat",
   timenam = NA,
-  do_chunks = TRUE,
+  do_chunks = FALSE,
   na.rm = TRUE,
   outdir = NA,
   fileprefix = NA,
