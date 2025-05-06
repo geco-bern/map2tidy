@@ -8,9 +8,13 @@
 <url><loc>/index.html</loc></url>
 <url><loc>/news/index.html</loc></url>
 <url><loc>/reference/check_list_of_ncfiles.html</loc></url>
+<url><loc>/reference/get_df_lon_index.html</loc></url>
+<url><loc>/reference/get_file_suffix.html</loc></url>
+<url><loc>/reference/get_grid.html</loc></url>
 <url><loc>/reference/get_index_by_chunk.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/map2tidy.html</loc></url>
+<url><loc>/reference/nclist_to_df_byfil.html</loc></url>
 <url><loc>/reference/nclist_to_df_byilon.html</loc></url>
 </urlset>
 
