@@ -11,6 +11,7 @@ test_that("test map2tidy", {
   df1 <- map2tidy(
     nclist = files,
     varnam = "et",
+    do_chunks = FALSE,
     lonnam = "lon",
     latnam = "lat",
     timenam = "time",
