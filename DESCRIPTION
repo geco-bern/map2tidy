@@ -24,7 +24,6 @@ Imports:
     dplyr,
     purrr,
     tidyr,
-    tidyselect,
     ncdf4,
     tidync,
     CFtime,
