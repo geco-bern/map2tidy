@@ -230,14 +230,15 @@ nclist_to_df_byilon <- function(
     # reverted to beni old
     df_list <- purrr::map(
       as.list(nclist),
-      ~nclist_to_df_byfil(filnam =.,
-                          ilon = ilon,
-                          varnam = varnam,
-                          lonnam = lonnam,
-                          latnam = latnam,
-                          timenam = timenam,
-                          na.rm = na.rm,
-                          fgetdate = fgetdate
+      ~ncfile_to_df(
+        filnam =.,
+        ilon = ilon,
+        varnam = varnam,
+        lonnam = lonnam,
+        latnam = latnam,
+        timenam = timenam,
+        na.rm = na.rm,
+        fgetdate = fgetdate
       )
     )
 
@@ -274,7 +275,7 @@ nclist_to_df_byilon <- function(
     message(paste0("File exists already: ", outpath))
     # return(df |> dplyr::select(lon) |> dplyr::distinct() |> dplyr::mutate(
     #   data = paste0("File exists already: ", outpath)))  # NOTE: can't output lon value if we don't read the NCfile
-    return(data.frame(lon=NA, data=paste0("File exists already: ", outpath)))
+    return(data.frame(lon = NA, data = paste0("File exists already: ", outpath)))
   }
 }
 
@@ -308,7 +309,7 @@ nclist_to_df_byilon <- function(
 #'         parsed separately.
 #' @export
 
-nclist_to_df_byfil <- function(
+ncfile_to_df <- function(
     filnam,
     ilon = NA,
     varnam,
@@ -346,9 +347,7 @@ nclist_to_df_byfil <- function(
   # all(varnam %in% ncdf_available_vars$name) || stop(err_msg_var)
 
   # get data
-  if (is.na(ilon)){
-    # get all data i.e. do not subset ncdf
-  } else {
+  if (!is.na(ilon)){
     # subset data to longitudinal band `ilon`
     # deal with dynamic longitude dimension name
     if (lonnam == "lon"){

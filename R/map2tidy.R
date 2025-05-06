@@ -58,7 +58,7 @@ map2tidy <- function(
   lonnam     = "lon",
   latnam     = "lat",
   timenam    = NA,
-  do_chunks  = TRUE,
+  do_chunks  = FALSE,
   na.rm      = TRUE,
   outdir     = NA,
   fileprefix = NA,
@@ -93,11 +93,12 @@ map2tidy <- function(
   # open one file to get longitude information: length of longitude dimension
   df_indices <- get_df_lon_index(nclist[1], lonnam)
 
-  # meta_dims <- tidync::hyper_dims(tidync::tidync(nclist[1]))
-  df_ilon_arg <- if (do_chunks){
-    df_indices # chunking by longitude into different files
+  if (do_chunks){
+    # chunking by longitude into different files
+    df_ilon_arg <- df_indices
   } else {
-    dplyr::tibble(lon_value="all", lon_index = NA_integer_) # no chunking. store into single file
+    # no chunking. store into single file
+    df_ilon_arg <- data.frame(lon_value = "all", lon_index = NA)
   }
 
   # subset only certain, requested longitude values:
