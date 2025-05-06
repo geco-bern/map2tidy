@@ -72,7 +72,7 @@ test_that("test map2tidy", {
   )
 
 
-  testthat::expect_warning(
+  testthat::expect_message(
     res2c <- map2tidy(  # do not overwrite
       nclist = files,
       varnam = "et",
