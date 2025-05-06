@@ -19,7 +19,6 @@ Description: Make geospatial data with a time dimension into a tidy format. Faci
 Depends:
     R (>= 4.2)
 Imports:
-    rlang,
     methods,
     dplyr,
     purrr,

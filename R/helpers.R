@@ -42,7 +42,7 @@ get_df_lon_index <- function(x, lonnam){
 
   if (is.list(x) && all(c("lon_start", "dlon", "len_ilon", "lat_start", "dlat", "len_ilat") %in% names(x))){
     # is a list specifying the grid
-    df_lon_index <- tidyr::tibble(
+    df_lon_index <- dplyr::tibble(
       lon_index = seq(x$len_ilon),
       lon_value = seq(from = x$lon_start, by = x$dlon, length.out = x$len_ilon)
     )
