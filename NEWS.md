@@ -1,3 +1,5 @@
+# map2tidy (development version)
+
 # map2tidy 2.1.4
 
 * Fixed issue ignoring `lonnam` argument.
