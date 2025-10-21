@@ -43,7 +43,7 @@
         <a class="external-link hidden-md hidden-lg" href="https://geco-group.org/">
           <img src="https://raw.githubusercontent.com/computationales/GECO_template/main/geco_logo_white_small.png" id="hexlogo" alt="GECO"></a>
         <a class="navbar-brand" href="../index.html">
-           <i>map2tidy <small>v2.1.3</small></i>
+           <i>map2tidy <small>v2.1.4</small></i>
         </a>
       </div>
     </div>
@@ -71,7 +71,12 @@
 <li>
   <a href="../news/index.html">Changelog</a>
 </li>
+        <li>
+  <a href="https://github.com/geco-bern/map2tidy/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
 
+  </a>
+</li>
       </ul>
 </div>
 <!--/.nav-collapse -->
@@ -91,7 +96,7 @@ Stocker</h4>
             
             <h4 data-toc-skip class="date">2023-11-03</h4>
       
-
+      <small class="dont-index">Source: <a href="https://github.com/geco-bern/map2tidy/blob/main/vignettes/parallel_computation.Rmd" class="external-link"><code>vignettes/parallel_computation.Rmd</code></a></small>
       <div class="hidden name"><code>parallel_computation.Rmd</code></div>
 
     </div>
@@ -123,7 +128,7 @@ example</em>. The demo data are raster files of 30 x 30 in latitude and
 longitude.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">map2tidy</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/geco-bern/map2tidy" class="external-link">map2tidy</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org" class="external-link">lubridate</a></span><span class="op">)</span></span>
 <span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"map2tidy"</span><span class="op">)</span>,<span class="st">"extdata"</span><span class="op">)</span></span>
 <span><span class="va">files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">path</span>, pattern <span class="op">=</span> <span class="st">"demo_data_2017_month"</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -238,7 +243,7 @@ three arguments:</p>
 <code class="sourceCode R"><span><span class="co">#!/usr/bin/env Rscript</span></span>
 <span><span class="va">args</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/commandArgs.html" class="external-link">commandArgs</a></span><span class="op">(</span>trailingOnly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>   <span class="co"># to receive arguments from the shell</span></span>
 <span>                                        <span class="co"># e.g. args &lt;- list(1,4,30)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">map2tidy</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/geco-bern/map2tidy" class="external-link">map2tidy</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"../analysis/add_loess.R"</span><span class="op">)</span>          <span class="co"># Load the workhorse function</span></span>
@@ -301,8 +306,8 @@ as an array job to four nodes, to be stored as
 <span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#SBATCH --mail-type=none                              # when do you want to get notified: none, all, begin, end, fail, requeue, array_tasks</span></span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#SBATCH --chdir=[[</span><span class="al">TODO</span><span class="co"> path/../../analysis]] # define here the working directory which contains your R-script, and where the output will be written to.</span></span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="bu">export</span> <span class="va">SBATCH_EXPORT</span><span class="op">=</span>NONE    <span class="co"># source: https://hpc-unibe-ch.github.io/slurm/submission.html#exportnone</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="bu">export</span> <span class="va">SLURM_EXPORT_ENV</span><span class="op">=</span>ALL  <span class="co"># source: https://hpc-unibe-ch.github.io/slurm/submission.html#exportnone</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="bu">export</span> <span class="va">SBATCH_EXPORT</span><span class="op">=</span>NONE</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="bu">export</span> <span class="va">SLURM_EXPORT_ENV</span><span class="op">=</span>ALL</span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a></span>
 <span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"Started on: </span><span class="va">$(</span><span class="fu">date</span> <span class="at">--rfc-3339</span><span class="op">=</span>seconds<span class="va">)</span><span class="st">"</span></span>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"Hostname: </span><span class="va">$(</span><span class="fu">hostname</span><span class="va">)</span><span class="st">"</span></span>
@@ -316,12 +321,12 @@ as an array job to four nodes, to be stored as
 <span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co"># </span><span class="al">NOTE</span><span class="co">: If you don't provide a chdir argument to SLURM, need provide to full path from the folder from which executing sbatch.</span></span>
 <span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a></span>
 <span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"Finished on: </span><span class="va">$(</span><span class="fu">date</span> <span class="at">--rfc-3339</span><span class="op">=</span>seconds<span class="va">)</span><span class="st">"</span></span></code></pre></div>
-<pre><code><span><span class="co">## Started on: 2025-05-06 08:14:16+00:00</span></span>
-<span><span class="co">## Hostname: fv-az1676-912</span></span>
+<pre><code><span><span class="co">## Started on: 2025-10-21 16:25:05+00:00</span></span>
+<span><span class="co">## Hostname: runnervmwhb2z</span></span>
 <span><span class="co">## Working directory: /home/runner/work/map2tidy/map2tidy/vignettes</span></span>
 <span><span class="co">## sh: 17: module: not found</span></span>
 <span><span class="co">## Fatal error: cannot open file 'add_loess_bychunk.R': No such file or directory</span></span>
-<span><span class="co">## Finished on: 2025-05-06 08:14:16+00:00</span></span></code></pre>
+<span><span class="co">## Finished on: 2025-10-21 16:25:05+00:00</span></span></code></pre>
 </div>
   </div>
 

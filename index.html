@@ -45,7 +45,7 @@
         <a class="external-link hidden-md hidden-lg" href="https://geco-group.org/">
           <img src="https://raw.githubusercontent.com/computationales/GECO_template/main/geco_logo_white_small.png" id="hexlogo" alt="GECO"></a>
         <a class="navbar-brand" href="index.html">
-           <i>map2tidy <small>v2.1.3</small></i>
+           <i>map2tidy <small>v2.1.4</small></i>
         </a>
       </div>
     </div>
@@ -73,7 +73,12 @@
 <li>
   <a href="news/index.html">Changelog</a>
 </li>
+        <li>
+  <a href="https://github.com/geco-bern/map2tidy/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
 
+  </a>
+</li>
       </ul>
 </div>
 <!--/.nav-collapse -->
@@ -104,7 +109,7 @@
 <p>(Internal note: This builds on the function <code>nclist_to_df</code> of package {rbeni}.)</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/map2tidy.html">map2tidy</a></span><span class="op">(</span></span>
-<span>  nclist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data-raw/"</span><span class="op">)</span>, </span>
+<span>  nclist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data-raw/"</span><span class="op">)</span>, </span>
 <span>                      pattern <span class="op">=</span> <span class="st">"demo_data_2017_month"</span>,</span>
 <span>                      full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, </span>
 <span>  varnam <span class="op">=</span> <span class="st">"et"</span>,</span>
@@ -125,14 +130,14 @@
 <p>When handling large files, having the complete data frame returned should be avoided to avoid memory overload. Write chunks of the data to separate files, placed in a directory as specified by the argument <code>outdir</code> with file names specified by argument <code>fileprefix</code>. The chunks will be along longitudinal bands (single index in longitude, all indices in latitude).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/map2tidy.html">map2tidy</a></span><span class="op">(</span></span>
-<span>  nclist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data-raw/"</span><span class="op">)</span>, </span>
+<span>  nclist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data-raw/"</span><span class="op">)</span>, </span>
 <span>                      pattern <span class="op">=</span> <span class="st">"demo_data_2017_month"</span>,</span>
 <span>                      full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, </span>
 <span>  varnam <span class="op">=</span> <span class="st">"et"</span>,</span>
 <span>  lonnam <span class="op">=</span> <span class="st">"lon"</span>, </span>
 <span>  latnam <span class="op">=</span> <span class="st">"lat"</span>, </span>
 <span>  timenam <span class="op">=</span> <span class="st">"time"</span>, </span>
-<span>  outdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data/"</span><span class="op">)</span>, </span>
+<span>  outdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data/"</span><span class="op">)</span>, </span>
 <span>  fileprefix <span class="op">=</span> <span class="st">"demo_data_2017"</span>, </span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
@@ -143,14 +148,14 @@
 <p>This process can be parallelised by setting the argument <code>ncores = 3</code> (or to another suitable number of cores).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/map2tidy.html">map2tidy</a></span><span class="op">(</span></span>
-<span>  nclist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data-raw/"</span><span class="op">)</span>, </span>
+<span>  nclist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data-raw/"</span><span class="op">)</span>, </span>
 <span>                      pattern <span class="op">=</span> <span class="st">"demo_data_2017_month"</span>,</span>
 <span>                      full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, </span>
 <span>  varnam <span class="op">=</span> <span class="st">"et"</span>,</span>
 <span>  lonnam <span class="op">=</span> <span class="st">"lon"</span>, </span>
 <span>  latnam <span class="op">=</span> <span class="st">"lat"</span>, </span>
 <span>  timenam <span class="op">=</span> <span class="st">"time"</span>, </span>
-<span>  outdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data/"</span><span class="op">)</span>, </span>
+<span>  outdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"/data/"</span><span class="op">)</span>, </span>
 <span>  fileprefix <span class="op">=</span> <span class="st">"demo_data_2017"</span>, </span>
 <span>  ncores <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
@@ -161,7 +166,15 @@
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="license">
+    <div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/geco-bern/map2tidy/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/geco-bern/map2tidy/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="https://www.r-project.org/Licenses/AGPL-3" class="external-link">AGPL-3</a></li>
