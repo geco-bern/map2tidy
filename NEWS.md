@@ -1,16 +1,19 @@
-# map2tidy (development version)
+# map2tidy 2.1.4
+
+* Fixed issue ignoring `lonnam` argument.
+* Made error messages more explicit.
 
 # map2tidy v2.1.3
 
-* added argument na.rm to map2tidy()
+* Added argument na.rm to map2tidy()
 
 # map2tidy v2.1.2
 
-* internally use pkg {parallelly} instead of {parallel}
+* Internally use pkg {parallelly} instead of {parallel}
 
 # map2tidy v2.1.1
 
-* activated RDS compression
+* Activated RDS compression
 
 # map2tidy v2.1
 
