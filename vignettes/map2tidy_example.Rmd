@@ -98,7 +98,7 @@ map2tidy(
 
 ## Hourly, daily, monthly and annual files
 
-The time axis treatment relies on on the package (`CFtime`)[https://github.com/pvanlaake/CFtime] that should be compatible with many different calendars, including non-standard calendars (no leap years, or 360-day years). Because non-standard calendar are not POSIXt-compatible (e.g. the date "2021-02-30"), `map2tidy()` does not return `datetimes` but simply `strings` describing the dates. The user is required to parse the dates themselves. Note that non-standard calendar (e.g., no leap years) are not tested.
+The time axis treatment relies on on the package (`CFtime`)[https://github.com/R-CF/CFtime] that should be compatible with many different calendars, including non-standard calendars (no leap years, or 360-day years). Because non-standard calendar are not POSIXt-compatible (e.g. the date "2021-02-30"), `map2tidy()` does not return `datetimes` but simply `strings` describing the dates. The user is required to parse the dates themselves. Note that non-standard calendar (e.g., no leap years) are not tested.
 
 ```{r eval = FALSE}
 # list demo file path

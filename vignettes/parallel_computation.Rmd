@@ -197,8 +197,8 @@ This is sent to the job scheduler as: `ssh ubelix`, `sbatch path/../../analysis/
 #SBATCH --mail-type=none                              # when do you want to get notified: none, all, begin, end, fail, requeue, array_tasks
 #SBATCH --chdir=[[TODO path/../../analysis]] # define here the working directory which contains your R-script, and where the output will be written to.
 
-export SBATCH_EXPORT=NONE    # source: https://hpc-unibe-ch.github.io/slurm/submission.html#exportnone
-export SLURM_EXPORT_ENV=ALL  # source: https://hpc-unibe-ch.github.io/slurm/submission.html#exportnone
+export SBATCH_EXPORT=NONE
+export SLURM_EXPORT_ENV=ALL
 
 echo "Started on: $(date --rfc-3339=seconds)"
 echo "Hostname: $(hostname)"
