@@ -67,7 +67,7 @@ get_df_lon_index <- function(x, lonnam){
       }
 
       df_lon_index <- x$transforms[[lonnam]] |>
-        dplyr::select(lon_index = 'index', lon_value = 'lon')
+        dplyr::select(all_of(c(lon_index = 'index', lon_value = lonnam)))
 
     }
   }
