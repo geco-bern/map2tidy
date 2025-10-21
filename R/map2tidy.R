@@ -90,7 +90,7 @@ map2tidy <- function(
   check_list_of_ncfiles(nclist) # errors if some mistakes found, NULL otherwise
 
   # check if requested dimensions and variables exist
-  check_ncfile_has_variables(nclist[[1]], filnam, lonnam, latnam, timenam, varnam)
+  check_ncfile_has_variables(nclist[[1]], lonnam, latnam, timenam, varnam)
 
   # Determine longitude indices for chunks
   # open one file to get longitude information: length of longitude dimension

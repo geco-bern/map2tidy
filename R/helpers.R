@@ -177,7 +177,10 @@ check_list_of_ncfiles <- function(nclist){
 #'
 #' @return NULL if the provided files contains valid, otherwise throws an error
 #'         indicating what is available.
-check_ncfile_has_variables <- function(ncdf, filnam, lonnam, latnam, timenam, varnam){
+
+
+check_ncfile_has_variables <- function(filnam, lonnam, latnam, timenam, varnam){
+  ncdf <- tidync::tidync(filnam)
   ncdf_available_dims <- tidync::hyper_dims(ncdf)
   ncdf_available_vars <- tidync::hyper_vars(ncdf)
   err_msg_lon <- sprintf(
