@@ -1,3 +1,5 @@
+# map2tidy (development version)
+
 # map2tidy v2.1.3
 
 * added argument na.rm to map2tidy()
