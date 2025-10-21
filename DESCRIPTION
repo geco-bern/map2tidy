@@ -48,3 +48,5 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 ByteCompile: true
+URL: https://github.com/geco-bern/map2tidy
+BugReports: https://github.com/geco-bern/map2tidy/issues
