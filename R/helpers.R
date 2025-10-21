@@ -161,6 +161,44 @@ check_list_of_ncfiles <- function(nclist){
   }
 }
 
+#' Checks validity of requested variables for a given NetCDF file
+#'
+#' @param ncdf A character string specifying the complete path to file.
+#' @param filnam A character string specifying the complete path to file.
+#' @param lonnam A character string specifying the dimension name of longitude
+#' in the NetCDF.
+#' @param latnam A character string specifying the dimension name of latitude
+#' in the NetCDF.
+#' @param timenam A character string specifying the dimension name of time in
+#' the NetCDF.
+#' @param varnam A vector of character strings specifying the variable name(s)
+#' for which data is to be read from the NetCDF files.
+#' @param varnam The
+#'
+#' @return NULL if the provided files contains valid, otherwise throws an error
+#'         indicating what is available.
+check_ncfile_has_variables <- function(ncdf, filnam, lonnam, latnam, timenam, varnam){
+  ncdf_available_dims <- tidync::hyper_dims(ncdf)
+  ncdf_available_vars <- tidync::hyper_vars(ncdf)
+  err_msg_lon <- sprintf(
+    "For file %s:\n  Provided name of longitudinal dimension as '%s', which is not among available dims: %s",
+    filnam, lonnam, paste0(ncdf_available_dims$name, collapse = ","))
+  err_msg_lat <- sprintf(
+    "For file %s:\n  Provided name of latitudinal dimension as '%s', which is not among available dims: %s",
+    filnam, latnam, paste0(ncdf_available_dims$name, collapse = ","))
+  err_msg_time <- sprintf(
+    "For file %s:\n  Provided name of time dimension as '%s', which is not among available dims: %s",
+    filnam, timenam, paste0(ncdf_available_dims$name, collapse = ","))
+  err_msg_var <- sprintf(
+    "For file %s:\n  Requested variable(s) '%s', which are not all among available variables: %s",
+    filnam, paste0(varnam, collapse = ","), paste0(ncdf_available_vars$name, collapse = ","))
+
+  lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
+  latnam %in% ncdf_available_dims$name || stop(err_msg_lat)
+  timenam%in% ncdf_available_dims$name || is.na(timenam) || stop(err_msg_time)
+  all(varnam %in% ncdf_available_vars$name) || stop(err_msg_var)
+}
+
 #' Returns a tidy data.frame from a list of NetCDF file(s),
 #' optionally subsetting a single a longitudinal band
 #'
@@ -328,27 +366,6 @@ ncfile_to_df <- function(
 
   # Setup extraction
   ncdf <- tidync::tidync(filnam)
-
-  # Beni 1.5.25: commented to speed up
-  # # check if requested dimensions and variables exist
-  # ncdf_available_dims <- tidync::hyper_dims(ncdf)
-  # ncdf_available_vars <- tidync::hyper_vars(ncdf)
-  # err_msg_lon <- sprintf(
-  #   "For file %s:\n  Provided name of longitudinal dimension as '%s', which is not among available dims: %s",
-  #   filnam, lonnam, paste0(ncdf_available_dims$name, collapse = ","))
-  # err_msg_lat <- sprintf(
-  #   "For file %s:\n  Provided name of latitudinal dimension as '%s', which is not among available dims: %s",
-  #   filnam, latnam, paste0(ncdf_available_dims$name, collapse = ","))
-  # err_msg_time <- sprintf(
-  #   "For file %s:\n  Provided name of time dimension as '%s', which is not among available dims: %s",
-  #   filnam, timenam, paste0(ncdf_available_dims$name, collapse = ","))
-  # lonnam %in% ncdf_available_dims$name || stop(err_msg_lon)
-  # latnam %in% ncdf_available_dims$name || stop(err_msg_lat)
-  # timenam%in% ncdf_available_dims$name || is.na(timenam) || stop(err_msg_time)
-  # err_msg_var <- sprintf(
-  #   "For file %s:\n  Requested variable(s) '%s', which are not all among available variables: %s",
-  #   filnam, paste0(varnam, collapse = ","), paste0(ncdf_available_vars$name, collapse = ","))
-  # all(varnam %in% ncdf_available_vars$name) || stop(err_msg_var)
 
   # get data
   if (!is.na(ilon)){

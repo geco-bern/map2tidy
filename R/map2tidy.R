@@ -89,6 +89,9 @@ map2tidy <- function(
   # check validity of NetCDF input files
   check_list_of_ncfiles(nclist) # errors if some mistakes found, NULL otherwise
 
+  # check if requested dimensions and variables exist
+  check_ncfile_has_variables(nclist[[1]], filnam, lonnam, latnam, timenam, varnam)
+
   # Determine longitude indices for chunks
   # open one file to get longitude information: length of longitude dimension
   df_indices <- get_df_lon_index(nclist[1], lonnam)
